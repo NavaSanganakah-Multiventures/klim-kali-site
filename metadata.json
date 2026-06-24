@@ -1,0 +1,8 @@
+{
+  "name": "Kali Mata Mandir",
+  "description": "Official website for Kali Mata Mandir featuring Aarti timings, Pooja services, Consultations, and Notifications by Acharya Pandit Dheerendra Tripathi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
