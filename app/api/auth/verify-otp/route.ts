@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { signToken } from "@/lib/auth";
 
+export const runtime = 'edge';
+
 export async function POST(req: NextRequest) {
   try {
     const { email, otp } = await req.json();
@@ -41,7 +43,7 @@ export async function POST(req: NextRequest) {
       db.users.set(userId, user);
     }
 
-    const token = signToken({ userId: user.id, email: user.email });
+    const token = await signToken({ userId: user.id, email: user.email });
 
     const response = NextResponse.json({ success: true, user });
     response.cookies.set("auth_token", token, {

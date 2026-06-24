@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 
+export const runtime = 'edge';
+
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("auth_token")?.value;
@@ -9,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const payload = verifyToken(token);
+    const payload = await verifyToken(token);
     if (!payload) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -52,7 +54,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const payload = verifyToken(token);
+    const payload = await verifyToken(token);
     if (!payload) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

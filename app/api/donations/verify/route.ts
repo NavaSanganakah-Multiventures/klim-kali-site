@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
 import { getDb } from "@/lib/db";
+
+export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,12 +13,18 @@ export async function POST(req: NextRequest) {
     } = await req.json();
 
     const secret = process.env.RAZORPAY_KEY_SECRET || "rzp_test_mock_secret";
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const bodyText = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const expectedSignature = crypto
-      .createHmac("sha256", secret)
-      .update(body.toString())
-      .digest("hex");
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const signatureBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(bodyText));
+    const expectedSignature = Array.from(new Uint8Array(signatureBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 
     const isAuthentic = expectedSignature === razorpay_signature;
 

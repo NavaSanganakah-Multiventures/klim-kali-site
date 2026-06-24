@@ -1,18 +1,26 @@
-import { createHmac } from "crypto";
-
 const SECRET = process.env.JWT_SECRET || "super-secret-kali-mata-key";
 
-export function signToken(payload: any): string {
+export async function signToken(payload: any): Promise<string> {
   const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const signature = createHmac("sha256", SECRET).update(`${header}.${body}`).digest("base64url");
+  
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const signatureBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(`${header}.${body}`));
+  const signature = Buffer.from(signatureBuffer).toString("base64url");
+  
   return `${header}.${body}.${signature}`;
 }
 
-export function verifyToken(token: string): any | null {
+export async function verifyToken(token: string): Promise<any | null> {
   try {
     const [header, body, signature] = token.split(".");
-    const expectedSignature = createHmac("sha256", SECRET).update(`${header}.${body}`).digest("base64url");
+    
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", enc.encode(SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const expectedSignatureBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(`${header}.${body}`));
+    const expectedSignature = Buffer.from(expectedSignatureBuffer).toString("base64url");
+    
     if (signature === expectedSignature) {
       return JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
     }
