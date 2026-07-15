@@ -71,8 +71,16 @@ export function Footer() {
 
         </div>
 
-        <div className="border-t border-orange-900 mt-16 pt-8 text-center text-orange-200/50 text-sm">
+        <div className="border-t border-orange-900 mt-16 pt-8 flex flex-col md:flex-row items-center justify-between text-orange-200/50 text-sm gap-4">
           <p suppressHydrationWarning>© {new Date().getFullYear()} काली माता मंदिर. सर्वाधिकार सुरक्षित।</p>
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="p-3 bg-orange-900 rounded-full hover:bg-red-600 hover:text-white transition-colors"
+            aria-label="Scroll to top"
+            suppressHydrationWarning
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-up"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+          </button>
         </div>
       </div>
     </footer>

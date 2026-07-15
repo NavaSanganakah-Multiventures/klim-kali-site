@@ -270,7 +270,7 @@ export function Donation() {
                 )}
               </div>
             ) : (
-              <form onSubmit={handleDonate} className="space-y-4">
+              <form onSubmit={handleDonate} className="space-y-4" suppressHydrationWarning>
                 <div>
                   <label className="block text-sm font-medium text-orange-950 mb-1.5">दान राशि (₹)</label>
                   <div className="grid grid-cols-4 gap-2 mb-3">
