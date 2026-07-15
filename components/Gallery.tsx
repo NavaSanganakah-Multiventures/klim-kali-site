@@ -27,16 +27,28 @@ export function Gallery() {
   return (
     <section id="gallery" className="py-24 bg-orange-950 text-white min-h-[80vh]">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
           <h2 className="text-3xl md:text-5xl font-bold mb-4">पवित्र गैलरी (Photo Gallery)</h2>
           <div className="w-24 h-1 bg-red-500 mx-auto rounded-full mb-6" />
           <p className="text-orange-200 text-lg max-w-2xl mx-auto">
             काली माता के नित्य नए श्रृंगार, मंदिर परिसर और उत्सवों की मनमोहक झलकियाँ।
           </p>
-        </div>
+        </motion.div>
 
         {/* Albums/Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="flex flex-wrap justify-center gap-2 md:gap-4 mb-12"
+        >
           {albums.map((album) => (
             <button
               key={album}
@@ -51,7 +63,7 @@ export function Gallery() {
               {album}
             </button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Gallery Grid */}
         <motion.div layout className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">

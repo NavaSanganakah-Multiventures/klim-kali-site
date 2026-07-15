@@ -54,13 +54,19 @@ export function Timings() {
       <div className="max-w-6xl mx-auto px-4">
         
         {/* Daily Timings Section */}
-        <div className="text-center mb-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
           <h2 className="text-3xl md:text-5xl font-bold text-orange-950 mb-4">दर्शन और आरती का समय</h2>
           <div className="w-24 h-1 bg-red-600 mx-auto rounded-full mb-6" />
           <p className="text-orange-900/70 text-lg max-w-2xl mx-auto">
             माता के दरबार में उपस्थित होकर अपना जीवन धन्य बनाएं।
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
           {dailyTimings.map((t, i) => (
@@ -84,7 +90,13 @@ export function Timings() {
 
         {/* Special Events Calendar Section */}
         <div>
-          <div className="flex items-center gap-4 mb-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex items-center gap-4 mb-10"
+          >
             <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center">
               <CalendarIcon className="w-6 h-6" />
             </div>
@@ -92,7 +104,7 @@ export function Timings() {
               <h2 className="text-3xl font-bold text-orange-950">आगामी विशेष आयोजन</h2>
               <p className="text-orange-800/70 font-medium">मंदिर में होने वाले विशेष पूजा-पाठ एवं अनुष्ठान (Events Calendar)</p>
             </div>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {upcomingEvents.map((event, i) => (

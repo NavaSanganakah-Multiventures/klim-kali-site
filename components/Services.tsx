@@ -42,13 +42,19 @@ export function Services() {
         <div className="absolute -left-40 bottom-20 w-96 h-96 bg-red-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50" />
 
         <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-orange-950 mb-4">हमारी सेवाएँ</h2>
-            <div className="w-24 h-1 bg-red-600 mx-auto rounded-full mb-6" />
-            <p className="text-orange-900/70 text-lg max-w-2xl mx-auto">
-              आचार्य पंडित धीरेंद्र त्रिपाठी जी के सानिध्य में वैदिक मंत्रोच्चार के साथ सभी धार्मिक अनुष्ठान संपन्न किए जाते हैं।
-            </p>
-          </div>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-5xl font-bold text-orange-950 mb-4">हमारी सेवाएँ</h2>
+          <div className="w-24 h-1 bg-red-600 mx-auto rounded-full mb-6" />
+          <p className="text-orange-900/70 text-lg max-w-2xl mx-auto">
+            आचार्य पंडित धीरेंद्र त्रिपाठी जी के सानिध्य में वैदिक मंत्रोच्चार के साथ सभी धार्मिक अनुष्ठान संपन्न किए जाते हैं।
+          </p>
+        </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {services.map((s, i) => (

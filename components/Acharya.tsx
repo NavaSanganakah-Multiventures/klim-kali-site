@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion } from "motion/react";
 import { Phone, Mail, MessageSquare, Instagram, Facebook, Youtube } from "lucide-react";
 import Image from "next/image";
 
@@ -10,7 +11,13 @@ export function Acharya() {
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="flex flex-col md:flex-row items-center gap-12">
           
-          <div className="flex-1 w-full max-w-md relative">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="flex-1 w-full max-w-md relative"
+          >
             <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl relative border-4 border-orange-100">
               <Image 
                 src="https://picsum.photos/seed/acharya/800/1000" 
@@ -22,9 +29,15 @@ export function Acharya() {
             </div>
             <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-orange-100 rounded-full -z-10 blur-2xl opacity-60"></div>
             <div className="absolute -top-6 -left-6 w-40 h-40 bg-red-50 rounded-full -z-10 blur-2xl opacity-60"></div>
-          </div>
+          </motion.div>
 
-          <div className="flex-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="flex-1"
+          >
             <h2 className="text-3xl md:text-5xl font-bold text-orange-950 mb-4">आचार्य पंडित धीरेंद्र त्रिपाठी</h2>
             <div className="w-24 h-1 bg-red-600 rounded-full mb-6" />
             
@@ -82,7 +95,7 @@ export function Acharya() {
               </div>
             </div>
 
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

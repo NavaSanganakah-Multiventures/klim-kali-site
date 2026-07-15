@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:worker": "npx -y @cloudflare/next-on-pages@1",
+    "build:worker": "npx -y @cloudflare/next-on-pages@1 && touch .vercel/output/static/.assetsignore",
     "start": "next start",
     "lint": "eslint .",
     "clean": "next clean"

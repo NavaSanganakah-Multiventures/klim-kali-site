@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion } from "motion/react";
 import { Heart, Loader2, Receipt } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { LoginModal } from "./LoginModal";
@@ -18,16 +19,7 @@ export function Donation() {
   
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      setName(user.email.split("@")[0]);
-      if (activeTab === "history") {
-        fetchDonations();
-      }
-    }
-  }, [user, activeTab]);
-
-  const fetchDonations = async () => {
+  const fetchDonations = React.useCallback(async () => {
     setLoadingHistory(true);
     try {
       const res = await fetch("/api/donations");
@@ -40,7 +32,17 @@ export function Donation() {
     } finally {
       setLoadingHistory(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setName(prev => prev || user.email.split("@")[0]);
+      if (activeTab === "history") {
+        fetchDonations();
+      }
+    }
+  }, [user, activeTab, fetchDonations]);
 
   const loadRazorpay = () => {
     return new Promise((resolve) => {
@@ -165,7 +167,13 @@ export function Donation() {
     <section id="donation" className="py-24 bg-orange-50 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="flex flex-col md:flex-row items-center gap-12">
-          <div className="flex-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex-1"
+          >
             <h2 className="text-3xl md:text-5xl font-bold text-orange-950 mb-6">सेवा व दान</h2>
             <div className="w-24 h-1 bg-red-600 rounded-full mb-6" />
             <p className="text-orange-900/80 text-lg mb-8 leading-relaxed">
@@ -184,9 +192,15 @@ export function Donation() {
                  </ul>
                </div>
             </div>
-          </div>
+          </motion.div>
           
-          <div className="flex-1 w-full max-w-md bg-white p-8 rounded-3xl shadow-xl border border-orange-100">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex-1 w-full max-w-md bg-white p-8 rounded-3xl shadow-xl border border-orange-100"
+          >
             {user ? (
               <div className="flex border-b border-orange-100 mb-6">
                 <button
@@ -332,7 +346,7 @@ export function Donation() {
                 )}
               </form>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
       <LoginModal 
