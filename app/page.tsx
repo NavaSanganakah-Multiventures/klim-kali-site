@@ -5,6 +5,7 @@ import { About } from "@/components/About"
 import { Services } from "@/components/Services"
 import { Gallery } from "@/components/Gallery"
 import { Notifications } from "@/components/Notifications"
+import { Acharya } from "@/components/Acharya"
 import { Donation } from "@/components/Donation"
 import { Footer } from "@/components/Footer"
 
@@ -16,6 +17,7 @@ export default function Home() {
       <Timings />
       <About />
       <Services />
+      <Acharya />
       <Gallery />
       <Donation />
       <Notifications />

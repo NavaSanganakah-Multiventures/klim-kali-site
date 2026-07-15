@@ -14,6 +14,7 @@ export function Navbar() {
     { name: "मुख्य पृष्ठ", href: "#home" },
     { name: "समय व आयोजन", href: "#timings" },
     { name: "सेवाएँ", href: "#services" },
+    { name: "आचार्य", href: "#acharya" },
     { name: "गैलरी", href: "#gallery" },
     { name: "सेवा व दान", href: "#donation" },
     { name: "ब्लॉग व सूचनाएं", href: "#blog" },

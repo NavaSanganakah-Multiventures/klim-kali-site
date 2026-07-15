@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { verifyToken } from "@/lib/auth";
 
 export const runtime = 'edge';
 
@@ -33,13 +34,25 @@ export async function POST(req: NextRequest) {
       if (!db.donations) {
         db.donations = new Map();
       }
+      
+      let userId = null;
+      const token = req.cookies.get("auth_token")?.value;
+      if (token) {
+        const payload = await verifyToken(token);
+        if (payload) {
+          userId = payload.userId;
+        }
+      }
+
       const donationId = Math.random().toString(36).substring(7);
       db.donations.set(donationId, {
         id: donationId,
+        userId: userId,
         orderId: razorpay_order_id,
         paymentId: razorpay_payment_id,
+        amount: donorDetails.amount,
         donor: donorDetails,
-        date: Date.now(),
+        createdAt: new Date().toISOString(),
       });
 
       return NextResponse.json({ success: true, message: "Payment verified successfully" });

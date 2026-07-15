@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { Heart, Loader2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Heart, Loader2, Receipt } from "lucide-react";
+import { useAuth } from "./AuthProvider";
+import { LoginModal } from "./LoginModal";
 
 export function Donation() {
   const [amount, setAmount] = useState<number | "">("");
@@ -9,6 +11,36 @@ export function Donation() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<"donate" | "history">("donate");
+  const [donations, setDonations] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      setName(user.email.split("@")[0]);
+      if (activeTab === "history") {
+        fetchDonations();
+      }
+    }
+  }, [user, activeTab]);
+
+  const fetchDonations = async () => {
+    setLoadingHistory(true);
+    try {
+      const res = await fetch("/api/donations");
+      if (res.ok) {
+        const data = await res.json();
+        setDonations(data.donations.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      }
+    } catch (error) {
+      console.error("Failed to fetch donations:", error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
   const loadRazorpay = () => {
     return new Promise((resolve) => {
@@ -155,7 +187,34 @@ export function Donation() {
           </div>
           
           <div className="flex-1 w-full max-w-md bg-white p-8 rounded-3xl shadow-xl border border-orange-100">
-            <h3 className="text-2xl font-bold text-orange-950 mb-6 text-center">ऑनलाइन दान करें</h3>
+            {user ? (
+              <div className="flex border-b border-orange-100 mb-6">
+                <button
+                  className={`flex-1 pb-3 text-center font-medium text-sm transition-colors relative ${
+                    activeTab === "donate" ? "text-orange-950" : "text-orange-900/60 hover:text-orange-950"
+                  }`}
+                  onClick={() => setActiveTab("donate")}
+                >
+                  दान करें
+                  {activeTab === "donate" && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600 rounded-t-full" />
+                  )}
+                </button>
+                <button
+                  className={`flex-1 pb-3 text-center font-medium text-sm transition-colors relative ${
+                    activeTab === "history" ? "text-orange-950" : "text-orange-900/60 hover:text-orange-950"
+                  }`}
+                  onClick={() => setActiveTab("history")}
+                >
+                  मेरा दान
+                  {activeTab === "history" && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600 rounded-t-full" />
+                  )}
+                </button>
+              </div>
+            ) : (
+              <h3 className="text-2xl font-bold text-orange-950 mb-6 text-center">ऑनलाइन दान करें</h3>
+            )}
             
             {message && (
               <div className={`mb-6 p-4 text-sm rounded-xl border text-center ${
@@ -165,76 +224,121 @@ export function Donation() {
               </div>
             )}
 
-            <form onSubmit={handleDonate} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-orange-950 mb-1.5">दान राशि (₹)</label>
-                <div className="grid grid-cols-4 gap-2 mb-3">
-                  {[101, 501, 1100, 2100].map(amt => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setAmount(amt)}
-                      className={`py-2 text-sm rounded-lg border font-medium transition-colors ${
-                        amount === amt 
-                          ? "bg-orange-600 border-orange-600 text-white" 
-                          : "border-orange-200 text-orange-700 hover:bg-orange-50"
-                      }`}
-                      suppressHydrationWarning
-                    >
-                      ₹{amt}
-                    </button>
-                  ))}
+            {activeTab === "history" ? (
+              <div className="space-y-4">
+                {loadingHistory ? (
+                  <div className="flex justify-center items-center py-12">
+                    <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+                  </div>
+                ) : donations.length > 0 ? (
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                    {donations.map((d: any) => (
+                      <div key={d.id} className="p-4 bg-orange-50 rounded-xl border border-orange-100 flex justify-between items-center">
+                        <div>
+                          <div className="font-bold text-orange-950">₹{d.amount}</div>
+                          <div className="text-xs text-orange-900/60 mt-1">
+                            {new Date(d.createdAt).toLocaleDateString("hi-IN", {
+                              day: 'numeric', month: 'long', year: 'numeric'
+                            })}
+                          </div>
+                        </div>
+                        <div className="p-2 bg-white rounded-full text-green-600 shadow-sm">
+                          <Receipt className="w-4 h-4" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-orange-900/60">
+                    <Heart className="w-12 h-12 mx-auto mb-3 text-orange-200" />
+                    <p>आपने अभी तक कोई दान नहीं किया है।</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <form onSubmit={handleDonate} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-orange-950 mb-1.5">दान राशि (₹)</label>
+                  <div className="grid grid-cols-4 gap-2 mb-3">
+                    {[101, 501, 1100, 2100].map(amt => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setAmount(amt)}
+                        className={`py-2 text-sm rounded-lg border font-medium transition-colors ${
+                          amount === amt 
+                            ? "bg-orange-600 border-orange-600 text-white" 
+                            : "border-orange-200 text-orange-700 hover:bg-orange-50"
+                        }`}
+                        suppressHydrationWarning
+                      >
+                        ₹{amt}
+                      </button>
+                    ))}
+                  </div>
+                  <input 
+                    type="number" 
+                    value={amount}
+                    onChange={(e) => setAmount(Number(e.target.value))}
+                    required
+                    min="1"
+                    className="w-full px-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
+                    placeholder="अन्य राशि दर्ज करें"
+                    suppressHydrationWarning
+                  />
                 </div>
-                <input 
-                  type="number" 
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
-                  required
-                  min="1"
-                  className="w-full px-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
-                  placeholder="अन्य राशि दर्ज करें"
-                  suppressHydrationWarning
-                />
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-orange-950 mb-1.5">आपका नाम</label>
-                <input 
-                  type="text" 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
-                  placeholder="पूरा नाम"
-                  suppressHydrationWarning
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-orange-950 mb-1.5">आपका नाम</label>
+                  <input 
+                    type="text" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
+                    placeholder="पूरा नाम"
+                    suppressHydrationWarning
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-orange-950 mb-1.5">मोबाइल नंबर</label>
-                <input 
-                  type="tel" 
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
-                  placeholder="+91"
-                  suppressHydrationWarning
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-orange-950 mb-1.5">मोबाइल नंबर</label>
+                  <input 
+                    type="tel" 
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
+                    placeholder="+91"
+                    suppressHydrationWarning
+                  />
+                </div>
 
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all disabled:opacity-70 flex justify-center items-center gap-2 mt-4"
-                suppressHydrationWarning
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "दान करें (Donate via Razorpay)"}
-              </button>
-            </form>
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all disabled:opacity-70 flex justify-center items-center gap-2 mt-4"
+                  suppressHydrationWarning
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "दान करें (Donate via Razorpay)"}
+                </button>
+
+                {!user && (
+                  <div className="mt-4 text-center">
+                    <p className="text-sm text-orange-900/70">
+                      अपना इतिहास देखने के लिए <button type="button" onClick={() => setShowLoginModal(true)} className="text-red-600 font-bold hover:underline">लॉगिन करें</button>
+                    </p>
+                  </div>
+                )}
+              </form>
+            )}
           </div>
         </div>
       </div>
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
+      />
     </section>
   );
 }
