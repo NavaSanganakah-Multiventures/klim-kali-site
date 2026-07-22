@@ -3,56 +3,73 @@
 import React, { useState } from "react";
 import { X, Calendar as CalendarIcon, Clock, User, Phone, Loader2, Sparkles } from "lucide-react";
 import { useAuth } from "./AuthProvider";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const bookingSchema = z.object({
+  serviceType: z.string().min(1, "सेवा का प्रकार चुनें"),
+  date: z.string().min(1, "दिनांक चुनें"),
+  time: z.string().min(1, "समय चुनें"),
+  name: z.string().min(2, "अपना पूरा नाम दर्ज करें"),
+  phone: z.string().min(10, "वैध मोबाइल नंबर दर्ज करें"),
+  message: z.string().optional(),
+});
+
+type BookingFormValues = z.infer<typeof bookingSchema>;
 
 export function BookingModal({ isOpen, onClose, selectedService = "व्यक्तिगत पूजा" }: { isOpen: boolean; onClose: () => void; selectedService?: string }) {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
+  const [apiError, setApiError] = useState("");
 
-  const [formData, setFormData] = useState({
-    serviceType: selectedService,
-    date: "",
-    time: "",
-    name: "",
-    phone: "",
-    message: ""
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<BookingFormValues>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      serviceType: selectedService,
+      date: "",
+      time: "",
+      name: "",
+      phone: "",
+      message: "",
+    },
   });
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: BookingFormValues) => {
     if (!user) {
-      setError("बुकिंग करने के लिए कृपया लॉगिन करें। (Please login to book)");
+      setApiError("बुकिंग करने के लिए कृपया लॉगिन करें। (Please login to book)");
       return;
     }
 
-    setLoading(true);
-    setError("");
+    setApiError("");
 
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
-      const data = await res.json();
+      const resData = await res.json();
       if (res.ok) {
         setSuccess(true);
       } else {
-        setError(data.error || "कुछ त्रुटि हुई।");
+        setApiError(resData.error || "कुछ त्रुटि हुई।");
       }
     } catch (e) {
-      setError("कुछ त्रुटि हुई।");
-    } finally {
-      setLoading(false);
+      setApiError("कुछ त्रुटि हुई।");
     }
   };
 
   const handleClose = () => {
     setSuccess(false);
-    setFormData({ serviceType: selectedService, date: "", time: "", name: "", phone: "", message: "" });
+    reset({ serviceType: selectedService, date: "", time: "", name: "", phone: "", message: "" });
     onClose();
   };
 
@@ -82,9 +99,9 @@ export function BookingModal({ isOpen, onClose, selectedService = "व्यक�
             </div>
           )}
 
-          {error && (
+          {apiError && (
             <div className="mb-6 p-3 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100 text-center">
-              {error}
+              {apiError}
             </div>
           )}
 
@@ -105,19 +122,18 @@ export function BookingModal({ isOpen, onClose, selectedService = "व्यक�
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-orange-950 mb-1.5">सेवा का प्रकार</label>
                 <select 
-                  value={formData.serviceType}
-                  onChange={(e) => setFormData({...formData, serviceType: e.target.value})}
-                  required
+                  {...register("serviceType")}
                   className="w-full px-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
                 >
                   <option value="व्यक्तिगत पूजा">व्यक्तिगत पूजा (नवग्रह शांति, गृह प्रवेश आदि)</option>
                   <option value="परामर्श व ज्योतिष">परामर्श व ज्योतिष (जन्म कुंडली, वास्तु)</option>
                   <option value="विशेष अनुष्ठान">विशेष अनुष्ठान</option>
                 </select>
+                {errors.serviceType && <p className="text-red-500 text-xs mt-1">{errors.serviceType.message}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -127,12 +143,11 @@ export function BookingModal({ isOpen, onClose, selectedService = "व्यक�
                     <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-400" />
                     <input 
                       type="date" 
-                      value={formData.date}
-                      onChange={(e) => setFormData({...formData, date: e.target.value})}
-                      required
+                      {...register("date")}
                       className="w-full pl-12 pr-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
                     />
                   </div>
+                  {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-orange-950 mb-1.5">समय (Time)</label>
@@ -140,12 +155,11 @@ export function BookingModal({ isOpen, onClose, selectedService = "व्यक�
                     <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-400" />
                     <input 
                       type="time" 
-                      value={formData.time}
-                      onChange={(e) => setFormData({...formData, time: e.target.value})}
-                      required
+                      {...register("time")}
                       className="w-full pl-12 pr-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
                     />
                   </div>
+                  {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time.message}</p>}
                 </div>
               </div>
 
@@ -155,13 +169,12 @@ export function BookingModal({ isOpen, onClose, selectedService = "व्यक�
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-400" />
                   <input 
                     type="text" 
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    required
+                    {...register("name")}
                     className="w-full pl-12 pr-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
                     placeholder="पूरा नाम"
                   />
                 </div>
+                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
               </div>
 
               <div>
@@ -170,32 +183,31 @@ export function BookingModal({ isOpen, onClose, selectedService = "व्यक�
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-400" />
                   <input 
                     type="tel" 
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    required
+                    {...register("phone")}
                     className="w-full pl-12 pr-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
                     placeholder="+91"
                   />
                 </div>
+                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-orange-950 mb-1.5">संदेश / विशेष जानकारी (Message)</label>
                 <textarea 
-                  value={formData.message}
-                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  {...register("message")}
                   rows={3}
                   className="w-full px-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950 resize-none"
                   placeholder="पूजा या परामर्श से संबंधित कोई विशेष बात..."
                 />
+                {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message.message}</p>}
               </div>
 
               <button 
                 type="submit" 
-                disabled={loading || !user}
+                disabled={isSubmitting || !user}
                 className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all disabled:opacity-70 flex justify-center items-center gap-2 mt-6"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "बुकिंग सुनिश्चित करें (Book Now)"}
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "बुकिंग सुनिश्चित करें (Book Now)"}
               </button>
             </form>
           )}

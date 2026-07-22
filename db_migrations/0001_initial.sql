@@ -1,6 +1,4 @@
--- schema.sql
--- Production and Preview D1 databases will be created from this schema.
-
+-- db_migrations/0001_initial.sql
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   id TEXT PRIMARY KEY,

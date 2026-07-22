@@ -23,24 +23,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const db = getDb();
     const bookingId = Math.random().toString(36).substring(7);
-    const booking = {
-      id: bookingId,
-      userId: payload.userId,
-      serviceType,
-      date,
-      time,
-      name,
-      phone,
-      message,
-      status: "PENDING",
-      createdAt: Date.now()
-    };
+    const createdAt = Date.now();
+    const status = "PENDING";
 
-    db.bookings.set(bookingId, booking);
+    let db;
+    try {
+      const { getRequestContext } = await import("@cloudflare/next-on-pages");
+      db = getRequestContext().env.DB;
+    } catch (e) {
+      // Ignore in standard Node environments
+    }
 
-    return NextResponse.json({ success: true, booking });
+    if (db) {
+      await db.prepare(
+        "INSERT INTO bookings (id, user_id, service_type, date, time, name, phone, message, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      ).bind(bookingId, payload.userId, serviceType, date, time, name, phone, message || null, status, new Date(createdAt).toISOString()).run();
+    } else {
+      const fallbackDb = getDb();
+      const booking = {
+        id: bookingId,
+        userId: payload.userId,
+        serviceType,
+        date,
+        time,
+        name,
+        phone,
+        message,
+        status,
+        createdAt
+      };
+      fallbackDb.bookings.set(bookingId, booking);
+    }
+
+    return NextResponse.json({ success: true, bookingId });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -59,8 +75,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const db = getDb();
-    const userBookings = Array.from(db.bookings.values()).filter(b => b.userId === payload.userId);
+    let db;
+    try {
+      const { getRequestContext } = await import("@cloudflare/next-on-pages");
+      db = getRequestContext().env.DB;
+    } catch (e) {
+      // Ignore
+    }
+
+    let userBookings = [];
+    if (db) {
+      const { results } = await db.prepare("SELECT * FROM bookings WHERE user_id = ?").bind(payload.userId).all();
+      userBookings = results;
+    } else {
+      const fallbackDb = getDb();
+      userBookings = Array.from(fallbackDb.bookings.values()).filter(b => b.userId === payload.userId);
+    }
 
     return NextResponse.json({ bookings: userBookings });
   } catch (error) {
