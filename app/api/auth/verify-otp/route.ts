@@ -28,6 +28,14 @@ export async function POST(req: NextRequest) {
     // Clean up used OTP
     db.otps.delete(validOtpEntry.id);
 
+    // Admin role configuration
+    const adminEmails = (process.env.ADMIN_EMAILS || "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const isAdmin = adminEmails.includes(email.toLowerCase());
+    const role = isAdmin ? "ADMIN" : "USER";
+
     // Find or create user
     let user = null;
     for (const [id, data] of db.users.entries()) {
@@ -39,11 +47,14 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       const userId = Math.random().toString(36).substring(7);
-      user = { id: userId, email, created_at: Date.now() };
+      user = { id: userId, email, role, created_at: Date.now() };
       db.users.set(userId, user);
+    } else {
+      // Sync role in case ADMIN_EMAILS changed
+      user.role = role;
     }
 
-    const token = await signToken({ userId: user.id, email: user.email });
+    const token = await signToken({ userId: user.id, email: user.email, role: user.role });
 
     const response = NextResponse.json({ success: true, user });
     response.cookies.set("auth_token", token, {
