@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { verifyToken } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 
@@ -29,8 +30,7 @@ export async function POST(req: NextRequest) {
 
     let db;
     try {
-      const { getRequestContext } = await import("@cloudflare/next-on-pages");
-      db = getRequestContext().env.DB;
+      db = getCloudflareContext().env.DB;
     } catch (e) {
       // Ignore in standard Node environments
     }
@@ -77,8 +77,7 @@ export async function GET(req: NextRequest) {
 
     let db;
     try {
-      const { getRequestContext } = await import("@cloudflare/next-on-pages");
-      db = getRequestContext().env.DB;
+      db = getCloudflareContext().env.DB;
     } catch (e) {
       // Ignore
     }
