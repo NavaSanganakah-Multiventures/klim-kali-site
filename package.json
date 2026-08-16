@@ -11,7 +11,8 @@
     "predeploy": "npx wrangler d1 migrations apply DB --remote",
     "start": "next start",
     "lint": "eslint .",
-    "clean": "next clean"
+    "clean": "next clean",
+    "build:worker": "opennextjs-cloudflare build"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
