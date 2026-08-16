@@ -5,12 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:worker": "npx -y @cloudflare/next-on-pages@1 && touch .vercel/output/static/.assetsignore",
+    "build:worker": "rm -rf .vercel .next .open-next && npx -y @cloudflare/next-on-pages@1 && touch .vercel/output/static/.assetsignore",
     "predeploy": "npx wrangler d1 migrations apply DB --remote",
     "deploy": "npm run build:worker && npx wrangler deploy",
     "start": "next start",
     "lint": "eslint .",
-    "clean": "next clean"
+    "clean": "next clean",
+    "deploy:clean": "npm run build:worker && npx wrangler deploy"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
