@@ -16,10 +16,24 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const db = getDb();
-    const userDonations = Array.from(db.donations.values()).filter(
-      (donation: any) => donation.userId === payload.userId
-    );
+    let db;
+    try {
+      const { getRequestContext } = await import("@cloudflare/next-on-pages");
+      db = getRequestContext().env.DB;
+    } catch (e) {
+      // local fallback
+    }
+
+    let userDonations = [];
+    if (db) {
+      const { results } = await db.prepare("SELECT * FROM donations WHERE user_id = ? ORDER BY created_at DESC").bind(payload.userId).all();
+      userDonations = results || [];
+    } else {
+      const db = getDb();
+      userDonations = Array.from(db.donations.values()).filter(
+        (donation: any) => donation.userId === payload.userId
+      );
+    }
 
     return NextResponse.json({ donations: userDonations });
   } catch (error) {
