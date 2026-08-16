@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export const runtime = 'edge';
 
@@ -12,6 +13,10 @@ export async function POST(req: NextRequest) {
       razorpay_signature,
       donorDetails,
     } = await req.json();
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !donorDetails) {
+      return NextResponse.json({ error: "Missing payment details" }, { status: 400 });
+    }
 
     const secret = process.env.RAZORPAY_KEY_SECRET || "rzp_test_mock_secret";
     const bodyText = razorpay_order_id + "|" + razorpay_payment_id;
@@ -29,36 +34,55 @@ export async function POST(req: NextRequest) {
 
     const isAuthentic = expectedSignature === razorpay_signature;
 
-    if (isAuthentic) {
-      const db = getDb();
-      if (!db.donations) {
-        db.donations = new Map();
-      }
-      
-      let userId = null;
-      const token = req.cookies.get("auth_token")?.value;
-      if (token) {
-        const payload = await verifyToken(token);
-        if (payload) {
-          userId = payload.userId;
-        }
-      }
+    if (!isAuthentic) {
+      return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 400 });
+    }
 
-      const donationId = Math.random().toString(36).substring(7);
-      db.donations.set(donationId, {
+    let db;
+    try {
+      db = getCloudflareContext().env.DB;
+    } catch (e) {
+      // local fallback
+    }
+
+    let userId = null;
+    const token = req.cookies.get("auth_token")?.value;
+    if (token) {
+      const payload = await verifyToken(token);
+      if (payload) {
+        userId = payload.userId;
+      }
+    }
+
+    const donationId = Math.random().toString(36).substring(7);
+
+    if (db) {
+      await db.prepare(
+        "INSERT INTO donations (id, user_id, amount, name, purpose, status) VALUES (?, ?, ?, ?, ?, ?)"
+      ).bind(
+        donationId,
+        userId || donorDetails.email || "anonymous",
+        donorDetails.amount,
+        donorDetails.name,
+        donorDetails.purpose || "Donation",
+        "SUCCESS"
+      ).run();
+    } else {
+      const fallbackDb = getDb();
+      fallbackDb.donations.set(donationId, {
         id: donationId,
         userId: userId,
         orderId: razorpay_order_id,
         paymentId: razorpay_payment_id,
         amount: donorDetails.amount,
-        donor: donorDetails,
+        name: donorDetails.name,
+        purpose: donorDetails.purpose || "Donation",
+        status: "SUCCESS",
         createdAt: new Date().toISOString(),
       });
-
-      return NextResponse.json({ success: true, message: "Payment verified successfully" });
-    } else {
-      return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 400 });
     }
+
+    return NextResponse.json({ success: true, message: "Payment verified successfully" });
   } catch (error) {
     console.error("Razorpay verify error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
