@@ -11,19 +11,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const db = getDb();
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    // Clean up old OTPs for this email
-    for (const [id, data] of db.otps.entries()) {
-      if (data.email === email) {
-        db.otps.delete(id);
-      }
+    let db;
+    try {
+      const { getRequestContext } = await import("@cloudflare/next-on-pages");
+      db = getRequestContext().env.DB;
+    } catch (e) {
+      // local dev / Node fallback
     }
 
-    const otpId = Math.random().toString(36).substring(7);
-    db.otps.set(otpId, { id: otpId, email, otp, expiresAt, created_at: Date.now() });
+    if (db) {
+      await db.prepare("DELETE FROM otps WHERE email = ?").bind(email).run();
+      const otpId = Math.random().toString(36).substring(7);
+      await db.prepare(
+        "INSERT INTO otps (id, email, otp, expires_at) VALUES (?, ?, ?, ?)"
+      ).bind(otpId, email, otp, new Date(expiresAt).toISOString()).run();
+    } else {
+      const fallbackDb = getDb();
+      for (const [id, data] of fallbackDb.otps.entries()) {
+        if (data.email === email) {
+          fallbackDb.otps.delete(id);
+        }
+      }
+      const otpId = Math.random().toString(36).substring(7);
+      fallbackDb.otps.set(otpId, { id: otpId, email, otp, expiresAt, created_at: Date.now() });
+    }
 
     await sendEmailOTP(email, otp);
 

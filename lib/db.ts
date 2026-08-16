@@ -6,6 +6,15 @@ export const memoryDb = {
   donations: new Map<string, any>(),
 };
 
+export async function getD1() {
+  try {
+    const { getRequestContext } = await import("@cloudflare/next-on-pages");
+    return getRequestContext().env.DB ?? null;
+  } catch (e) {
+    return null;
+  }
+}
+
 export function getDb() {
   // In a real Cloudflare Workers environment, you would access the D1 binding via context or process.env (if using next-on-pages).
   // For this Node.js preview environment, we use an in-memory mock.

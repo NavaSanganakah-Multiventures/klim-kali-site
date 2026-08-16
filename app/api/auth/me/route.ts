@@ -15,8 +15,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ user: null }, { status: 401 });
   }
 
-  const db = getDb();
-  const user = db.users.get(payload.userId);
+  let db;
+  try {
+    const { getRequestContext } = await import("@cloudflare/next-on-pages");
+    db = getRequestContext().env.DB;
+  } catch (e) {
+    // Ignore in standard Node environments
+  }
+
+  let user;
+  if (db) {
+    const row = await db.prepare(
+      "SELECT id, email, name, role, created_at FROM users WHERE id = ?"
+    ).bind(payload.userId).first();
+    user = row;
+  } else {
+    const fallbackDb = getDb();
+    user = fallbackDb.users.get(payload.userId);
+  }
 
   if (!user) {
     return NextResponse.json({ user: null }, { status: 401 });
