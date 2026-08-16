@@ -39,10 +39,14 @@ export async function POST(req: NextRequest) {
       fallbackDb.otps.set(otpId, { id: otpId, email, otp, expiresAt, created_at: Date.now() });
     }
 
-    await sendEmailOTP(email, otp);
+    const emailResult = await sendEmailOTP(email, otp);
 
-    // In preview mode, return OTP in response for easy testing
-    return NextResponse.json({ success: true, message: "OTP sent successfully", previewOtp: otp });
+    if (!emailResult.success) {
+      return NextResponse.json({ error: emailResult.error || "Failed to send OTP email" }, { status: 500 });
+    }
+
+    const isDev = process.env.NODE_ENV !== "production";
+    return NextResponse.json({ success: true, message: "OTP sent successfully", previewOtp: isDev ? otp : undefined });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
