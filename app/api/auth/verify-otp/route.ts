@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { signToken } from "@/lib/auth";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export const runtime = 'edge';
 
@@ -13,13 +14,11 @@ export async function POST(req: NextRequest) {
 
     let db;
     try {
-      const { getRequestContext } = await import("@cloudflare/next-on-pages");
-      db = getRequestContext().env.DB;
+      db = getCloudflareContext().env.DB;
     } catch (e) {
       // local dev / Node fallback
     }
 
-    // Admin role configuration
     const adminEmails = (process.env.ADMIN_EMAILS || "")
       .split(",")
       .map((e) => e.trim().toLowerCase())
@@ -88,8 +87,8 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json({ success: true, user });
     response.cookies.set("auth_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7, // 1 week
+      secure: true, // HTTPS only
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
 

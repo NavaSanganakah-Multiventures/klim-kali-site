@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export const runtime = 'edge';
 
@@ -17,8 +18,7 @@ export async function GET(req: NextRequest) {
 
   let db;
   try {
-    const { getRequestContext } = await import("@cloudflare/next-on-pages");
-    db = getRequestContext().env.DB;
+    db = getCloudflareContext().env.DB;
   } catch (e) {
     // Ignore in standard Node environments
   }

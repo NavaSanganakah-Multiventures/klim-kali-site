@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export type AdminUser = {
   id: string;
@@ -22,8 +23,7 @@ export async function requireAdmin(req: NextRequest) {
 
   let db;
   try {
-    const { getRequestContext } = await import("@cloudflare/next-on-pages");
-    db = getRequestContext().env.DB;
+    db = getCloudflareContext().env.DB;
   } catch (e) {
     // local dev fallback
   }

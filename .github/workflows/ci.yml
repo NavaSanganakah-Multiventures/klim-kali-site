@@ -30,18 +30,18 @@ jobs:
       - name: Run ESLint
         run: bun run lint
 
-      - name: Build Cloudflare Worker
+      - name: Build Cloudflare Worker (OpenNext)
         run: bun run build:worker
 
       - name: Verify build output
         run: |
-          if [ ! -f ".vercel/output/static/_worker.js/index.js" ]; then
+          if [ ! -f ".open-next/worker.js" ]; then
             echo "Worker bundle not found"
             exit 1
           fi
           echo "Worker bundle created successfully"
-          if [ ! -d ".vercel/output/functions/api" ]; then
-            echo "API functions not generated"
+          if [ ! -d ".open-next/assets" ]; then
+            echo "Static assets not generated"
             exit 1
           fi
-          echo "API functions generated successfully"
+          echo "Static assets generated successfully"
