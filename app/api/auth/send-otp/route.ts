@@ -15,9 +15,11 @@ export async function POST(req: NextRequest) {
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     let db;
+    let workerEnv;
     try {
       const { getRequestContext } = await import("@cloudflare/next-on-pages");
-      db = getRequestContext().env.DB;
+      workerEnv = getRequestContext().env;
+      db = workerEnv.DB;
     } catch (e) {
       // local dev / Node fallback
     }
