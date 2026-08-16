@@ -18,6 +18,10 @@ binding = "DB"
 database_name = "kali-mata-prod-db"
 database_id = "PROD_D1_ID_HERE"
 
+# Send Email Binding for Production
+[[env.production.email_bindings]]
+name = "SEB"
+
 # R2 Bucket for Production
 [[env.production.r2_buckets]]
 binding = "STORAGE"
@@ -37,6 +41,10 @@ name = "kali-mata-mandir-preview"
 binding = "DB"
 database_name = "kali-mata-preview-db"
 database_id = "PREVIEW_D1_ID_HERE"
+
+# Send Email Binding for Preview
+[[env.preview.email_bindings]]
+name = "SEB"
 
 # R2 Bucket for Preview
 [[env.preview.r2_buckets]]
