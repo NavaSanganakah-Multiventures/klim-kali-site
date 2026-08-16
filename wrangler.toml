@@ -1,16 +1,13 @@
-name = 'klim-kali-site'
-compatibility_date = "2024-03-20"
+name = "klim-kali-site"
+compatibility_date = "2026-08-16"
 compatibility_flags = ["nodejs_compat"]
-main = ".vercel/output/static/_worker.js/index.js"
+main = ".open-next/worker.js"
 
 [assets]
-directory = ".vercel/output/static"
+directory = ".open-next/assets"
 binding = "ASSETS"
 
 migrations_dir = "db_migrations"
-
-[build]
-command = "npm run build:worker"
 
 # Production Environment
 [env.production]
