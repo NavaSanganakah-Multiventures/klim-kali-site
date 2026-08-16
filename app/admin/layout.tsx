@@ -1,25 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { AdminNavbar } from "@/components/AdminNavbar";
 import { Loader2 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (!loading) {
-      if (!user || user.role !== "ADMIN") {
-        window.location.href = "/";
-      } else {
-        setChecking(false);
-      }
+    if (!loading && (!user || user.role !== "ADMIN")) {
+      window.location.href = "/";
     }
   }, [user, loading]);
 
-  if (loading || checking) {
+  if (loading || !user || user.role !== "ADMIN") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-orange-50">
         <Loader2 className="w-8 h-8 text-orange-600 animate-spin" />
