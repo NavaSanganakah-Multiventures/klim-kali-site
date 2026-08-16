@@ -1,29 +1,30 @@
-// Cloudflare Email Sending Service Helper
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+
 export async function sendEmailOTP(
   email: string,
-  otp: string,
-  env?: any
+  otp: string
 ): Promise<{ success: boolean; error?: string }> {
   console.log(`[Email] Sending OTP ${otp} to ${email}`);
 
-  // 1. Try Send Email Binding first (best option for Cloudflare Workers)
-  if (env?.SEB) {
-    try {
+  // 1. Primary: Cloudflare Send Email Binding (SEB)
+  try {
+    const { env } = getCloudflareContext();
+    if (env.SEB) {
       await env.SEB.send({
         to: email,
         from: "om@klimkali.in",
         subject: "काली माता मंदिर - आपका लॉगिन OTP",
         text: `काली माता मंदिर में आपका स्वागत है!\n\nआपका लॉगिन OTP है: ${otp}\nयह 10 मिनट के लिए मान्य है।`,
       });
-      console.log("[Email] Sent via Send Email Binding");
+      console.log("[Email] Sent via Send Email Binding (SEB)");
       return { success: true };
-    } catch (e: any) {
-      console.error("[Email] Send Email Binding failed:", e);
-      // Fall through to REST API fallback
     }
+  } catch (e: any) {
+    console.error("[Email] Send Email Binding failed:", e);
+    // Fall through to REST API fallback
   }
 
-  // 2. Fallback to Cloudflare Email Routing REST API
+  // 2. Fallback: Cloudflare Email Routing REST API
   const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
   const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN;
 
@@ -40,13 +41,8 @@ export async function sendEmailOTP(
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        personalizations: [
-          { to: [{ email: email }] }
-        ],
-        from: {
-          email: "om@klimkali.in",
-          name: "Klim Kali"
-        },
+        personalizations: [{ to: [{ email: email }] }],
+        from: { email: "om@klimkali.in", name: "Klim Kali" },
         subject: "काली माता मंदिर - आपका लॉगिन OTP",
         content: [
           {
@@ -59,7 +55,7 @@ export async function sendEmailOTP(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("[Email] Cloudflare REST API error:", errorText);
+      console.error("[Email] REST API error:", errorText);
       return { success: false, error: "Failed to send email via Cloudflare" };
     }
 
