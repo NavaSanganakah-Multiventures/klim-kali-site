@@ -150,30 +150,30 @@ export default function AdminLivePage() {
         </div>
         {!isConfigured && (
           <p className="mt-4 text-xs text-orange-500 bg-orange-50 p-3 rounded-lg">
-            ⚠️ Pehle neeche YouTube settings (Channel ID + OAuth) save karo, tab Start button chalega.
+            ⚠️ Pehle neeche YouTube settings (Channel ID + Stream Key + OAuth) save karo, tab Start button chalega.
           </p>
         )}
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <h2 className="font-semibold text-orange-950 mb-1">YouTube Settings</h2>
-        <p className="text-sm text-orange-600 mb-4">Ye ek baar set karna hota hai.</p>
+        <p className="text-sm text-orange-600 mb-4">Ye ek baar set karna hota hai. Jahan "••" dikhe wahan secret set hai — naya value type karo to update, ya khaali karke Save karo to remove.</p>
 
         <div className="space-y-4">
           <Field label="YouTube Channel ID" hint="channel ka ID (youtube.com/channel/... wala)">
             <input className={inputCls} value={form.youtube_channel_id} onChange={set("youtube_channel_id")} placeholder="UCxxxxxxxxxxxxxxxxxxxx" />
           </Field>
           <Field label="Stream Key (jo camera me dala hai)" hint="YouTube Studio → Go Live → Stream key">
-            <input className={inputCls} value={form.youtube_stream_key} onChange={set("youtube_stream_key")} placeholder="xxxx-xxxx-xxxx-xxxx" />
+            <input type="password" className={inputCls} value={form.youtube_stream_key} onChange={set("youtube_stream_key")} placeholder="xxxx-xxxx-xxxx-xxxx" />
           </Field>
           <Field label="OAuth Client ID">
             <input className={inputCls} value={form.oauth_client_id} onChange={set("oauth_client_id")} placeholder="Google Cloud se client id" />
           </Field>
           <Field label="OAuth Client Secret">
-            <input className={inputCls} value={form.oauth_client_secret} onChange={set("oauth_client_secret")} placeholder="Google Cloud se client secret" />
+            <input type="password" className={inputCls} value={form.oauth_client_secret} onChange={set("oauth_client_secret")} placeholder="Google Cloud se client secret" />
           </Field>
           <Field label="OAuth Refresh Token">
-            <input className={inputCls} value={form.oauth_refresh_token} onChange={set("oauth_refresh_token")} placeholder="OAuth Playground se refresh token" />
+            <input type="password" className={inputCls} value={form.oauth_refresh_token} onChange={set("oauth_refresh_token")} placeholder="OAuth Playground se refresh token" />
           </Field>
         </div>
 
