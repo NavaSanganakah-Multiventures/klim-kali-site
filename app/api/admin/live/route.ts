@@ -23,13 +23,14 @@ export async function GET(req: NextRequest) {
     const config = await getLiveConfig(db);
     return NextResponse.json({
       youtube_channel_id: (config && config.youtube_channel_id) || "",
-      youtube_stream_key: (config && config.youtube_stream_key) || "",
+      youtube_stream_key: mask((config && config.youtube_stream_key) || ""),
       oauth_client_id: mask((config && config.oauth_client_id) || ""),
       oauth_client_secret: mask((config && config.oauth_client_secret) || ""),
       oauth_refresh_token: config && config.oauth_refresh_token ? "set" : "",
       isConfigured: !!(
         config &&
         config.youtube_channel_id &&
+        config.youtube_stream_key &&
         config.oauth_client_id &&
         config.oauth_client_secret &&
         config.oauth_refresh_token
@@ -65,24 +66,22 @@ export async function PUT(req: NextRequest) {
           ? body.youtube_channel_id.trim()
           : config.youtube_channel_id,
       youtube_stream_key:
-        typeof body.youtube_stream_key === "string"
+        typeof body.youtube_stream_key === "string" &&
+        body.youtube_stream_key.indexOf("••") === -1
           ? body.youtube_stream_key.trim()
           : config.youtube_stream_key,
       oauth_client_id:
         typeof body.oauth_client_id === "string" &&
-        body.oauth_client_id.trim() !== "" &&
         body.oauth_client_id.indexOf("••") === -1
           ? body.oauth_client_id.trim()
           : config.oauth_client_id,
       oauth_client_secret:
         typeof body.oauth_client_secret === "string" &&
-        body.oauth_client_secret.trim() !== "" &&
         body.oauth_client_secret.indexOf("••") === -1
           ? body.oauth_client_secret.trim()
           : config.oauth_client_secret,
       oauth_refresh_token:
         typeof body.oauth_refresh_token === "string" &&
-        body.oauth_refresh_token.trim() !== "" &&
         body.oauth_refresh_token !== "set"
           ? body.oauth_refresh_token.trim()
           : config.oauth_refresh_token,
@@ -103,7 +102,7 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      isConfigured: !!(next.youtube_channel_id && next.oauth_client_id && next.oauth_client_secret && next.oauth_refresh_token),
+      isConfigured: !!(next.youtube_channel_id && next.youtube_stream_key && next.oauth_client_id && next.oauth_client_secret && next.oauth_refresh_token),
     });
   } catch (error) {
     console.error("Admin live PUT error:", error);
