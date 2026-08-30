@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { LayoutDashboard, CalendarCheck, Heart, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, CalendarCheck, Heart, Users, Radio, LogOut } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 
 const links = [
@@ -10,6 +10,7 @@ const links = [
   { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
   { href: "/admin/donations", label: "Donations", icon: Heart },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/live", label: "Live Darshan", icon: Radio },
 ];
 
 export function AdminNavbar() {
@@ -18,7 +19,7 @@ export function AdminNavbar() {
   return (
     <aside className="w-64 min-h-screen bg-orange-950 text-orange-100 flex flex-col">
       <div className="p-6 border-b border-orange-900">
-        <h1 className="text-xl font-bold text-white">à¤à¤¾à¤²à¥ à¤®à¤¾à¤¤à¤¾ à¤®à¤à¤¦à¤¿à¤°</h1>
+        <h1 className="text-xl font-bold text-white">काली माता मंदिर</h1>
         <p className="text-xs text-orange-400 mt-1">Admin Panel</p>
       </div>
       <nav className="flex-1 p-4 space-y-2">
