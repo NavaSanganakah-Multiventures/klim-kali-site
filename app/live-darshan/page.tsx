@@ -32,7 +32,7 @@ export default async function LiveDarshanPage() {
               <div className="rounded-2xl overflow-hidden shadow-xl aspect-video bg-black">
                 <iframe
                   className="w-full h-full"
-                  src={"https://www.youtube.com/embed/live_stream?channel=" + channelId + "&autoplay=1"}
+                  src={"https://www.youtube.com/embed/live_stream?channel=" + channelId + "&autoplay=1&mute=1"}
                   title="काली माता मंदिर लाइव दर्शन"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
