@@ -11,13 +11,14 @@ export function Navbar() {
   const { user, logout } = useAuth()
 
   const links = [
-    { name: "मुख्य पृष्ठ", href: "#home" },
-    { name: "समय व आयोजन", href: "#timings" },
-    { name: "सेवाएँ", href: "#services" },
-    { name: "आचार्य", href: "#acharya" },
-    { name: "गैलरी", href: "#gallery" },
-    { name: "सेवा व दान", href: "#donation" },
-    { name: "ब्लॉग व सूचनाएं", href: "#blog" },
+    { name: "मुख्य पृष्ठ", href: "/#home" },
+    { name: "लाइव दर्शन", href: "/live-darshan" },
+    { name: "समय व आयोजन", href: "/#timings" },
+    { name: "सेवाएँ", href: "/#services" },
+    { name: "आचार्य", href: "/#acharya" },
+    { name: "गैलरी", href: "/#gallery" },
+    { name: "सेवा व दान", href: "/#donation" },
+    { name: "ब्लॉग व सूचनाएं", href: "/#blog" },
   ]
 
   return (
@@ -26,14 +27,14 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="#home" className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white font-bold text-xl">
                   क
                 </div>
                 <span className="font-bold text-2xl text-orange-900">काली माता मंदिर</span>
               </Link>
             </div>
-            
+
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-8 items-center">
               {links.map((link) => (
@@ -45,7 +46,7 @@ export function Navbar() {
                   {link.name}
                 </Link>
               ))}
-              
+
               {user ? (
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2 text-orange-900 font-medium bg-orange-50 px-3 py-1.5 rounded-full">
@@ -119,9 +120,9 @@ export function Navbar() {
         )}
       </nav>
 
-      <LoginModal 
-        isOpen={isLoginModalOpen} 
-        onClose={() => setIsLoginModalOpen(false)} 
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
       />
     </>
   )
