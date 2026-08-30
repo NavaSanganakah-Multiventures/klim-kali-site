@@ -19,6 +19,7 @@ export function isLiveConfigured(config: Partial<LiveConfig> | null): boolean {
   return !!(
     config &&
     config.youtube_channel_id &&
+    config.youtube_stream_key &&
     config.oauth_client_id &&
     config.oauth_client_secret &&
     config.oauth_refresh_token
@@ -92,7 +93,7 @@ async function resolveStreamId(accessToken: string, streamKey: string): Promise<
       return s.id as string;
     }
   }
-  return items.length ? (items[0].id as string) : null;
+  return null;
 }
 
 async function findLiveBroadcastId(accessToken: string): Promise<string | null> {
@@ -172,10 +173,10 @@ export async function endLive(config: LiveConfig, db: any): Promise<{ warning?: 
 
   try {
     const accessToken = await fetchAccessToken(config, db);
-    let broadcastId = config.current_broadcast_id;
-    if (!broadcastId) {
-      broadcastId = (await findLiveBroadcastId(accessToken)) || "";
-    }
+    // Prefer the broadcast that is actually live right now (handles cases where
+    // the stored id was already ended externally and a new one was started).
+    const liveBroadcastId = await findLiveBroadcastId(accessToken);
+    const broadcastId = liveBroadcastId || config.current_broadcast_id;
 
     if (broadcastId) {
       const res = await fetch(
