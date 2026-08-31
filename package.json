@@ -10,7 +10,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "predeploy": "npx wrangler d1 migrations apply DB --remote",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "clean": "next clean",
     "build:worker": "opennextjs-cloudflare build"
   },
@@ -41,7 +41,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "9.39.1",
+    "eslint": "8.57.1",
     "eslint-config-next": "^15.5.24",
     "firebase-tools": "^15.0.0",
     "tailwindcss": "4.1.11",
