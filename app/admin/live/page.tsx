@@ -157,7 +157,7 @@ export default function AdminLivePage() {
 
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <h2 className="font-semibold text-orange-950 mb-1">YouTube Settings</h2>
-        <p className="text-sm text-orange-600 mb-4">Ye ek baar set karna hota hai. Jahan "••" dikhe wahan secret set hai — naya value type karo to update, ya khaali karke Save karo to remove.</p>
+        <p className="text-sm text-orange-600 mb-4">Ye ek baar set karna hota hai. Jahan &quot;••&quot; dikhe wahan secret set hai — naya value type karo to update, ya khaali karke Save karo to remove.</p>
 
         <div className="space-y-4">
           <Field label="YouTube Channel ID" hint="channel ka ID (youtube.com/channel/... wala)">

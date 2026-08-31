@@ -36,7 +36,6 @@ export function Donation() {
 
   useEffect(() => {
     if (user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(prev => prev || user.email.split("@")[0]);
       if (activeTab === "history") {
         fetchDonations();
