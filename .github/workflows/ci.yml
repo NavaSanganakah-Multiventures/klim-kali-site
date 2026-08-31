@@ -27,12 +27,7 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            bun install
-          else
-            bun install --frozen-lockfile
-          fi
+        run: bun install
 
       - name: Commit regenerated lockfile (workflow_dispatch only)
         if: github.event_name == 'workflow_dispatch'
