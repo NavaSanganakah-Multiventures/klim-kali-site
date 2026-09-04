@@ -2,7 +2,6 @@ name = "klim-kali-site"
 compatibility_date = "2026-08-16"
 compatibility_flags = ["nodejs_compat"]
 main = ".open-next/worker.js"
-migrations_dir = "db_migrations"
 
 [assets]
 directory = ".open-next/assets"
@@ -11,46 +10,27 @@ binding = "ASSETS"
 # Production Environment
 [env.production]
 name = "kali-mata-mandir-prod"
+
 # D1 Database for Production
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "kali-mata-prod-db"
-database_id = "PROD_D1_ID_HERE"
+migrations_dir = "db_migrations"
 
 # Send Email Binding for Production
 [[env.production.email_bindings]]
 name = "SEB"
 
-# R2 Bucket for Production
-[[env.production.r2_buckets]]
-binding = "STORAGE"
-bucket_name = "kali-mata-prod-storage"
-
-# KV Namespace for Secrets/Config
-[[env.production.kv_namespaces]]
-binding = "CONFIG"
-id = "PROD_KV_ID_HERE"
-
-
 # Preview / Development Environment
 [env.preview]
 name = "kali-mata-mandir-preview"
+
 # D1 Database for Preview
 [[env.preview.d1_databases]]
 binding = "DB"
 database_name = "kali-mata-preview-db"
-database_id = "PREVIEW_D1_ID_HERE"
+migrations_dir = "db_migrations"
 
 # Send Email Binding for Preview
 [[env.preview.email_bindings]]
 name = "SEB"
-
-# R2 Bucket for Preview
-[[env.preview.r2_buckets]]
-binding = "STORAGE"
-bucket_name = "kali-mata-preview-storage"
-
-# KV Namespace for Secrets/Config
-[[env.preview.kv_namespaces]]
-binding = "CONFIG"
-id = "PREVIEW_KV_ID_HERE"
