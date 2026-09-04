@@ -26,9 +26,10 @@ export async function POST(req: NextRequest) {
       // local dev / Node fallback
     }
 
-    const adminEmails = (process.env.ADMIN_EMAILS || cloudflareEnv.ADMIN_EMAILS || "")
+    const adminEmailsValue = String(process.env.ADMIN_EMAILS || cloudflareEnv.ADMIN_EMAILS || "");
+    const adminEmails = adminEmailsValue
       .split(",")
-      .map((e) => e.trim().toLowerCase())
+      .map((e: string) => e.trim().toLowerCase())
       .filter(Boolean);
     const isAdmin = adminEmails.includes(email);
     const role = isAdmin ? "ADMIN" : "USER";
