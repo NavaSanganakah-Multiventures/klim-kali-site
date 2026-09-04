@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { getLiveConfig } from "@/lib/youtube";
 
-export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 function mask(value: string): string {
   if (!value) return "";
