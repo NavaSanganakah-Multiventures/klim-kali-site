@@ -3,7 +3,7 @@ import { verifyToken } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-export const runtime = 'edge';
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const token = req.cookies.get("auth_token")?.value;

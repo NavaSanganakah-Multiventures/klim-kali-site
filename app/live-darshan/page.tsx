@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { Navbar } from "@/components/Navbar";
 import Link from "next/link";
 
-export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 export default async function LiveDarshanPage() {
   let isLive = false;
