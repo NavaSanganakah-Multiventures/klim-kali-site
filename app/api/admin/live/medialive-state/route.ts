@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { getLiveConfig } from "@/lib/youtube";
 import { describeMedialiveChannel, isMedialiveConfigured } from "@/lib/medialive";
 
-export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const admin = await requireAdmin(req);
