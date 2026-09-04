@@ -3,7 +3,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { verifyToken } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 
-export const runtime = 'edge';
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
