@@ -6,7 +6,6 @@
     "dev": "next dev",
     "build": "next build",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env production",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "predeploy": "npx wrangler d1 migrations apply DB --remote --env production",
     "start": "next start",
