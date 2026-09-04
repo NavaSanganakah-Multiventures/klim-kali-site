@@ -32,29 +32,3 @@ bucket_name = "kali-mata-prod-storage"
 [[env.production.kv_namespaces]]
 binding = "CONFIG"
 id = "PROD_KV_ID_HERE"
-
-
-# Preview / Development Environment
-[env.preview]
-name = "kali-mata-mandir-preview"
-
-# D1 Database for Preview
-[[env.preview.d1_databases]]
-binding = "DB"
-database_name = "kali-mata-preview-db"
-database_id = "PREVIEW_D1_ID_HERE"
-migrations_dir = "db_migrations"
-
-# Send Email Binding for Preview
-[[env.preview.send_email]]
-name = "SEB"
-
-# R2 Bucket for Preview
-[[env.preview.r2_buckets]]
-binding = "STORAGE"
-bucket_name = "kali-mata-preview-storage"
-
-# KV Namespace for Secrets/Config
-[[env.preview.kv_namespaces]]
-binding = "CONFIG"
-id = "PREVIEW_KV_ID_HERE"
