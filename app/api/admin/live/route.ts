@@ -37,6 +37,18 @@ export async function GET(req: NextRequest) {
       ),
       is_live: config && config.is_live ? 1 : 0,
       current_broadcast_id: (config && config.current_broadcast_id) || "",
+      use_medialive: config && config.use_medialive ? 1 : 0,
+      aws_region: (config && config.aws_region) || "",
+      aws_access_key_id: mask((config && config.aws_access_key_id) || ""),
+      aws_secret_access_key: config && config.aws_secret_access_key ? "set" : "",
+      medialive_channel_id: (config && config.medialive_channel_id) || "",
+      isMedialiveConfigured: !!(
+        config &&
+        config.aws_region &&
+        config.aws_access_key_id &&
+        config.aws_secret_access_key &&
+        config.medialive_channel_id
+      ),
     });
   } catch (error) {
     console.error("Admin live GET error:", error);
@@ -85,24 +97,52 @@ export async function PUT(req: NextRequest) {
         body.oauth_refresh_token !== "set"
           ? body.oauth_refresh_token.trim()
           : config.oauth_refresh_token,
+      use_medialive:
+        body.use_medialive === 1 || body.use_medialive === true || body.use_medialive === "1"
+          ? 1
+          : 0,
+      aws_region:
+        typeof body.aws_region === "string"
+          ? body.aws_region.trim()
+          : config.aws_region,
+      aws_access_key_id:
+        typeof body.aws_access_key_id === "string" &&
+        body.aws_access_key_id.indexOf("••") === -1
+          ? body.aws_access_key_id.trim()
+          : config.aws_access_key_id,
+      aws_secret_access_key:
+        typeof body.aws_secret_access_key === "string" &&
+        body.aws_secret_access_key !== "set"
+          ? body.aws_secret_access_key.trim()
+          : config.aws_secret_access_key,
+      medialive_channel_id:
+        typeof body.medialive_channel_id === "string"
+          ? body.medialive_channel_id.trim()
+          : config.medialive_channel_id,
     };
 
     await db
       .prepare(
-        "UPDATE live_stream_config SET youtube_channel_id = ?, youtube_stream_key = ?, oauth_client_id = ?, oauth_client_secret = ?, oauth_refresh_token = ?, updated_at = datetime('now') WHERE id = 1"
+        "UPDATE live_stream_config SET youtube_channel_id = ?, youtube_stream_key = ?, oauth_client_id = ?, oauth_client_secret = ?, oauth_refresh_token = ?, use_medialive = ?, aws_region = ?, aws_access_key_id = ?, aws_secret_access_key = ?, medialive_channel_id = ?, updated_at = datetime('now') WHERE id = 1"
       )
       .bind(
         next.youtube_channel_id,
         next.youtube_stream_key,
         next.oauth_client_id,
         next.oauth_client_secret,
-        next.oauth_refresh_token
+        next.oauth_refresh_token,
+        next.use_medialive,
+        next.aws_region,
+        next.aws_access_key_id,
+        next.aws_secret_access_key,
+        next.medialive_channel_id
       )
       .run();
 
     return NextResponse.json({
       success: true,
       isConfigured: !!(next.youtube_channel_id && next.youtube_stream_key && next.oauth_client_id && next.oauth_client_secret && next.oauth_refresh_token),
+      isMedialiveConfigured: !!(next.aws_region && next.aws_access_key_id && next.aws_secret_access_key && next.medialive_channel_id),
     });
   } catch (error) {
     console.error("Admin live PUT error:", error);
