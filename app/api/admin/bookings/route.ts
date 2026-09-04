@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { getDb } from "@/lib/db";
 
-export const runtime = 'edge';
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const admin = await requireAdmin(req);
