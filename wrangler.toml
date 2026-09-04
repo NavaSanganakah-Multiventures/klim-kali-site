@@ -2,7 +2,7 @@ name = "klim-kali-site"
 compatibility_date = "2026-08-16"
 compatibility_flags = ["nodejs_compat"]
 main = ".open-next/worker.js"
-migrations_dir = "db_migrations"
+keep_vars = true
 
 [assets]
 directory = ".open-next/assets"
@@ -11,14 +11,16 @@ binding = "ASSETS"
 # Production Environment
 [env.production]
 name = "kali-mata-mandir-prod"
+
 # D1 Database for Production
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "kali-mata-prod-db"
 database_id = "PROD_D1_ID_HERE"
+migrations_dir = "db_migrations"
 
 # Send Email Binding for Production
-[[env.production.email_bindings]]
+[[env.production.send_email]]
 name = "SEB"
 
 # R2 Bucket for Production
@@ -35,14 +37,16 @@ id = "PROD_KV_ID_HERE"
 # Preview / Development Environment
 [env.preview]
 name = "kali-mata-mandir-preview"
+
 # D1 Database for Preview
 [[env.preview.d1_databases]]
 binding = "DB"
 database_name = "kali-mata-preview-db"
 database_id = "PREVIEW_D1_ID_HERE"
+migrations_dir = "db_migrations"
 
 # Send Email Binding for Preview
-[[env.preview.email_bindings]]
+[[env.preview.send_email]]
 name = "SEB"
 
 # R2 Bucket for Preview
