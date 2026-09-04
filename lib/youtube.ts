@@ -1,4 +1,9 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import {
+  isMedialiveConfigured,
+  startMedialiveChannel,
+  stopMedialiveChannel,
+} from "./medialive";
 
 export type LiveConfig = {
   youtube_channel_id: string;
@@ -10,6 +15,11 @@ export type LiveConfig = {
   oauth_token_expiry: number;
   current_broadcast_id: string;
   is_live: number;
+  use_medialive: number;
+  aws_region: string;
+  aws_access_key_id: string;
+  aws_secret_access_key: string;
+  medialive_channel_id: string;
 };
 
 const YT_API = "https://www.googleapis.com/youtube/v3";
@@ -110,6 +120,16 @@ export async function startLive(
   config: LiveConfig,
   db: any
 ): Promise<{ broadcastId: string }> {
+  // Start the AWS MediaLive channel first (audio re-encode pipeline) if enabled
+  if (config.use_medialive) {
+    if (!isMedialiveConfigured(config)) {
+      throw new Error(
+        "AWS MediaLive settings configure nahi hain. Admin → Live Darshan me AWS Region + Access Key + Secret Key + Channel ID save karo."
+      );
+    }
+    await startMedialiveChannel(config);
+  }
+
   const accessToken = await fetchAccessToken(config, db);
 
   const streamId = await resolveStreamId(accessToken, config.youtube_stream_key);
@@ -170,6 +190,16 @@ export async function startLive(
 
 export async function endLive(config: LiveConfig, db: any): Promise<{ warning?: string }> {
   let warning: string | undefined;
+
+  // Stop the MediaLive channel first (stop pushing RTMP to YouTube)
+  if (config.use_medialive && isMedialiveConfigured(config)) {
+    try {
+      await stopMedialiveChannel(config);
+    } catch (e: any) {
+      warning =
+        (e && e.message) ? "MediaLive stop failed: " + e.message : "MediaLive stop failed";
+    }
+  }
 
   try {
     const accessToken = await fetchAccessToken(config, db);
