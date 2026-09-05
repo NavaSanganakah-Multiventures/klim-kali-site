@@ -42,6 +42,9 @@ export async function GET(req: NextRequest) {
       aws_access_key_id: mask((config && config.aws_access_key_id) || ""),
       aws_secret_access_key: config && config.aws_secret_access_key ? "set" : "",
       medialive_channel_id: (config && config.medialive_channel_id) || "",
+      medialive_input_id: (config && config.medialive_input_id) || "",
+      camera_rtmp_url: (config && config.camera_rtmp_url) || "",
+      camera_rtmp_backup_url: (config && config.camera_rtmp_backup_url) || "",
       isMedialiveConfigured: !!(
         config &&
         config.aws_region &&
@@ -119,11 +122,23 @@ export async function PUT(req: NextRequest) {
         typeof body.medialive_channel_id === "string"
           ? body.medialive_channel_id.trim()
           : config.medialive_channel_id,
+      medialive_input_id:
+        typeof body.medialive_input_id === "string"
+          ? body.medialive_input_id.trim()
+          : config.medialive_input_id,
+      camera_rtmp_url:
+        typeof body.camera_rtmp_url === "string"
+          ? body.camera_rtmp_url.trim()
+          : config.camera_rtmp_url,
+      camera_rtmp_backup_url:
+        typeof body.camera_rtmp_backup_url === "string"
+          ? body.camera_rtmp_backup_url.trim()
+          : config.camera_rtmp_backup_url,
     };
 
     await db
       .prepare(
-        "UPDATE live_stream_config SET youtube_channel_id = ?, youtube_stream_key = ?, oauth_client_id = ?, oauth_client_secret = ?, oauth_refresh_token = ?, use_medialive = ?, aws_region = ?, aws_access_key_id = ?, aws_secret_access_key = ?, medialive_channel_id = ?, updated_at = datetime('now') WHERE id = 1"
+        "UPDATE live_stream_config SET youtube_channel_id = ?, youtube_stream_key = ?, oauth_client_id = ?, oauth_client_secret = ?, oauth_refresh_token = ?, use_medialive = ?, aws_region = ?, aws_access_key_id = ?, aws_secret_access_key = ?, medialive_channel_id = ?, medialive_input_id = ?, camera_rtmp_url = ?, camera_rtmp_backup_url = ?, updated_at = datetime('now') WHERE id = 1"
       )
       .bind(
         next.youtube_channel_id,
@@ -135,7 +150,10 @@ export async function PUT(req: NextRequest) {
         next.aws_region,
         next.aws_access_key_id,
         next.aws_secret_access_key,
-        next.medialive_channel_id
+        next.medialive_channel_id,
+        next.medialive_input_id,
+        next.camera_rtmp_url,
+        next.camera_rtmp_backup_url
       )
       .run();
 
