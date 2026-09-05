@@ -10,7 +10,7 @@ binding = "ASSETS"
 
 # Production Environment
 [env.production]
-name = "kali-mata-mandir-prod"
+name = "klim-kali-site"
 
 # D1 Database for Production
 [[env.production.d1_databases]]
