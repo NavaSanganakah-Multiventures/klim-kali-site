@@ -31,7 +31,7 @@ export function Navbar() {
                 <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white font-bold text-xl">
                   क
                 </div>
-                <span className="font-bold text-2xl text-orange-900">काली माता मंदिर</span>
+                <span className="font-bold text-2xl text-orange-900">क्लीं काली</span>
               </Link>
             </div>
 
