@@ -118,7 +118,7 @@ export function Donation() {
         key: orderData.keyId,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "काली माता मंदिर",
+        name: "क्लीं काली",
         description: "मंदिर के लिए दान व सेवा",
         order_id: orderData.orderId,
         handler: async function (response: any) {
