@@ -20,6 +20,9 @@ export type LiveConfig = {
   aws_access_key_id: string;
   aws_secret_access_key: string;
   medialive_channel_id: string;
+  medialive_input_id: string;
+  camera_rtmp_url: string;
+  camera_rtmp_backup_url: string;
 };
 
 const YT_API = "https://www.googleapis.com/youtube/v3";
