@@ -25,7 +25,7 @@ export default async function LiveDarshanPage() {
       <main className="min-h-screen bg-orange-50 pt-28 pb-16">
         <div className="max-w-5xl mx-auto px-4">
           <h1 className="text-4xl font-bold text-orange-900 text-center">लाइव दर्शन</h1>
-          <p className="text-center text-orange-700 mt-2">काली माता मंदिर से सीधा प्रसारण</p>
+          <p className="text-center text-orange-700 mt-2">क्लीं काली से सीधा प्रसारण</p>
 
           {isLive && channelId ? (
             <div className="mt-8">
@@ -33,7 +33,7 @@ export default async function LiveDarshanPage() {
                 <iframe
                   className="w-full h-full"
                   src={"https://www.youtube.com/embed/live_stream?channel=" + channelId + "&autoplay=1&mute=1"}
-                  title="काली माता मंदिर लाइव दर्शन"
+                  title="क्लीं काली लाइव दर्शन"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />

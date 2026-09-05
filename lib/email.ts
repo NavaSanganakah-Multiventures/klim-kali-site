@@ -19,8 +19,8 @@ export async function sendEmailOTP(
       await cfEnv.SEB.send({
         to: email,
         from: "om@klimkali.in",
-        subject: "काली माता मंदिर - आपका लॉगिन OTP",
-        text: `काली माता मंदिर में आपका स्वागत है!\n\nआपका लॉगिन OTP है: ${otp}\nयह 10 मिनट के लिए मान्य है।`,
+        subject: "क्लीं काली - आपका लॉगिन OTP",
+        text: `क्लीं काली में आपका स्वागत है!\n\nआपका लॉगिन OTP है: ${otp}\nयह 10 मिनट के लिए मान्य है।`,
       });
       console.log("[Email] Sent via Send Email Binding (SEB)");
       return { success: true };
@@ -49,8 +49,8 @@ export async function sendEmailOTP(
       body: JSON.stringify({
         to: email,
         from: "om@klimkali.in",
-        subject: "काली माता मंदिर - आपका लॉगिन OTP",
-        text: `काली माता मंदिर में आपका स्वागत है!\n\nआपका लॉगिन OTP है: ${otp}\nयह 10 मिनट के लिए मान्य है।`
+        subject: "क्लीं काली - आपका लॉगिन OTP",
+        text: `क्लीं काली में आपका स्वागत है!\n\nआपका लॉगिन OTP है: ${otp}\nयह 10 मिनट के लिए मान्य है।`
       })
     });
 

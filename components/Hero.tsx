@@ -34,8 +34,7 @@ export function Hero() {
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold text-orange-950 tracking-tight leading-tight">
-            श्री सिद्ध पीठ <br/>
-            <span className="text-red-700">काली माता मंदिर</span>
+            क्लीं काली
           </h1>
           
           <p className="text-lg md:text-2xl text-orange-900/80 max-w-2xl mx-auto font-medium">

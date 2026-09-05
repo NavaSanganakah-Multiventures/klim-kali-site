@@ -13,7 +13,7 @@ export function Footer() {
               <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-xl">
                 क
               </div>
-              <span className="font-bold text-2xl text-white">काली माता मंदिर</span>
+              <span className="font-bold text-2xl text-white">क्लीं काली</span>
             </div>
             <p className="text-orange-200/70 leading-relaxed mb-6">
               माता का यह पावन दरबार सभी भक्तों की मनोकामनाएं पूर्ण करता है। श्रद्धा और विश्वास के साथ दर्शन के लिए पधारें।
@@ -25,7 +25,7 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-4">
                 <MapPin className="w-6 h-6 text-red-500 shrink-0" />
-                <span>काली माता मंदिर, गिन्दोरहाट, सुठालिया, राजगढ़, मध्य प्रदेश - 465677</span>
+                <span>क्लीं काली, गिन्दोरहाट, सुठालिया, राजगढ़, मध्य प्रदेश - 465677</span>
               </li>
               <li className="flex items-center gap-4">
                 <Phone className="w-6 h-6 text-red-500 shrink-0" />
@@ -72,7 +72,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-orange-900 mt-16 pt-8 flex flex-col md:flex-row items-center justify-between text-orange-200/50 text-sm gap-4">
-          <p suppressHydrationWarning>© {new Date().getFullYear()} काली माता मंदिर. सर्वाधिकार सुरक्षित।</p>
+          <p suppressHydrationWarning>© {new Date().getFullYear()} क्लीं काली. सर्वाधिकार सुरक्षित।</p>
           <button 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="p-3 bg-orange-900 rounded-full hover:bg-red-600 hover:text-white transition-colors"
