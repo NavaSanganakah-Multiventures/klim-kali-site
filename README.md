@@ -1,4 +1,4 @@
-# Kali Mata Mandir Site (klim-kali-site)
+# Kleem Kali Site (klim-kali-site)
 
 Next.js (App Router) site deployed on Cloudflare Workers via OpenNext.
 Uses D1 (database), R2 (storage) and Email bindings.
