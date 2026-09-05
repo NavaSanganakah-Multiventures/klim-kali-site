@@ -7,32 +7,42 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, otp } = await req.json();
+    const body = await req.json();
+    const rawEmail = body?.email;
+    const rawOtp = body?.otp;
+    const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
+    const otp = typeof rawOtp === "string" ? rawOtp.trim() : "";
     if (!email || !otp) {
       return NextResponse.json({ error: "Email and OTP are required" }, { status: 400 });
     }
 
     let db;
+    let cloudflareEnv: any = {};
     try {
-      db = getCloudflareContext().env.DB;
+      const ctx = getCloudflareContext();
+      cloudflareEnv = ctx.env || {};
+      db = cloudflareEnv.DB;
     } catch (e) {
       // local dev / Node fallback
     }
 
-    const adminEmails = (process.env.ADMIN_EMAILS || "")
+    const adminEmailsValue = String(process.env.ADMIN_EMAILS || cloudflareEnv.ADMIN_EMAILS || "");
+    const adminEmails = adminEmailsValue
       .split(",")
-      .map((e) => e.trim().toLowerCase())
+      .map((e: string) => e.trim().toLowerCase())
       .filter(Boolean);
-    const isAdmin = adminEmails.includes(email.toLowerCase());
+    const isAdmin = adminEmails.includes(email);
     const role = isAdmin ? "ADMIN" : "USER";
 
     let user: any = null;
     let validOtpEntry: any = null;
 
     if (db) {
+      // expires_at is stored as an ISO-8601 string, so compare against an ISO
+      // timestamp rather than SQLite's datetime('now') (different format).
       validOtpEntry = await db.prepare(
-        "SELECT * FROM otps WHERE email = ? AND otp = ? AND expires_at > datetime('now')"
-      ).bind(email, otp).first();
+        "SELECT * FROM otps WHERE email = ? AND otp = ? AND expires_at > ?"
+      ).bind(email, otp, new Date().toISOString()).first();
 
       if (!validOtpEntry) {
         return NextResponse.json({ error: "Invalid or expired OTP" }, { status: 400 });
@@ -87,7 +97,9 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json({ success: true, user });
     response.cookies.set("auth_token", token, {
       httpOnly: true,
-      secure: true, // HTTPS only
+      // Only require HTTPS in production; local development runs on http://localhost.
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });

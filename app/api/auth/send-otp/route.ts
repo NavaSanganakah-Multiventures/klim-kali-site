@@ -7,7 +7,9 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json();
+    const body = await req.json();
+    const rawEmail = body?.email;
+    const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
     if (!email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
@@ -40,12 +42,21 @@ export async function POST(req: NextRequest) {
     }
 
     const emailResult = await sendEmailOTP(email, otp);
+    const isDev = process.env.NODE_ENV !== "production";
 
     if (!emailResult.success) {
+      // In development, let the login flow continue with the preview OTP so it
+      // can be tested without a configured email service.
+      if (isDev) {
+        return NextResponse.json({
+          success: true,
+          message: "OTP generated (email not sent in development)",
+          previewOtp: otp,
+        });
+      }
       return NextResponse.json({ error: emailResult.error || "Failed to send OTP email" }, { status: 500 });
     }
 
-    const isDev = process.env.NODE_ENV !== "production";
     return NextResponse.json({ success: true, message: "OTP sent successfully", previewOtp: isDev ? otp : undefined });
   } catch (error) {
     console.error(error);
