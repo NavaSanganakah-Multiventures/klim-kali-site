@@ -19,7 +19,7 @@ export function AdminNavbar() {
   return (
     <aside className="w-64 min-h-screen bg-orange-950 text-orange-100 flex flex-col">
       <div className="p-6 border-b border-orange-900">
-        <h1 className="text-xl font-bold text-white">काली माता मंदिर</h1>
+        <h1 className="text-xl font-bold text-white">क्लीं काली</h1>
         <p className="text-xs text-orange-400 mt-1">Admin Panel</p>
       </div>
       <nav className="flex-1 p-4 space-y-2">
