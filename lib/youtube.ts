@@ -139,8 +139,8 @@ export async function startLive(
 
   const insertBody = {
     snippet: {
-      title: "काली माता मंदिर - लाइव दर्शन",
-      description: "काली माता मंदिर से लाइव दर्शन",
+      title: "क्लीं काली - लाइव दर्शन",
+      description: "क्लीं काली से लाइव दर्शन",
       scheduledStartTime: new Date().toISOString(),
     },
     status: {
