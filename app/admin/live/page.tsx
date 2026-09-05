@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Loader2, Power, Radio, Save, Youtube } from "lucide-react";
+import { Camera, Check, Copy, Loader2, Power, Radio, Save, Youtube } from "lucide-react";
 
 const inputCls =
   "w-full px-3 py-2 rounded-lg border border-orange-200 bg-orange-50/40 text-orange-950 placeholder:text-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500";
@@ -28,6 +28,9 @@ export default function AdminLivePage() {
     aws_access_key_id: "",
     aws_secret_access_key: "",
     medialive_channel_id: "",
+    medialive_input_id: "",
+    camera_rtmp_url: "",
+    camera_rtmp_backup_url: "",
   });
   const [isLive, setIsLive] = useState(false);
   const [isConfigured, setIsConfigured] = useState(false);
@@ -52,6 +55,9 @@ export default function AdminLivePage() {
         aws_access_key_id: data.aws_access_key_id || "",
         aws_secret_access_key: data.aws_secret_access_key || "",
         medialive_channel_id: data.medialive_channel_id || "",
+        medialive_input_id: data.medialive_input_id || "",
+        camera_rtmp_url: data.camera_rtmp_url || "",
+        camera_rtmp_backup_url: data.camera_rtmp_backup_url || "",
       });
       setIsConfigured(!!data.isConfigured);
       setIsLive(!!data.is_live);
@@ -132,6 +138,74 @@ export default function AdminLivePage() {
       setMlState("Error: " + (e.message || "check failed"));
     } finally {
       setMlBusy(false);
+    }
+  };
+
+  const [mlInputs, setMlInputs] = useState<any[]>([]);
+  const [mlInputBusy, setMlInputBusy] = useState(false);
+  const [mlInputMessage, setMlInputMessage] = useState("");
+  const [copied, setCopied] = useState("");
+
+  const loadInputs = async () => {
+    setMlInputBusy(true);
+    setMlInputMessage("");
+    try {
+      const res = await fetch("/api/admin/live/medialive-inputs");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Inputs load failed");
+      setMlInputs(data.inputs || []);
+      if (!(data.inputs && data.inputs.length)) {
+        setMlInputMessage("Koi RTMP push input nahi mila. AWS MediaLive console me RTMP (push) input banao.");
+      }
+    } catch (e: any) {
+      setMlInputMessage("Error: " + (e.message || "inputs load failed"));
+    } finally {
+      setMlInputBusy(false);
+    }
+  };
+
+  const selectInput = (e: any) => {
+    const id = e.target.value;
+    const input = mlInputs.find((i) => i.id === id);
+    const dests = input && input.destinations ? input.destinations : [];
+    setForm((f) => ({
+      ...f,
+      medialive_input_id: id,
+      camera_rtmp_url: dests[0] ? dests[0].url || "" : "",
+      camera_rtmp_backup_url: dests[1] ? dests[1].url || "" : "",
+    }));
+  };
+
+  const testInput = async () => {
+    if (!form.medialive_input_id) {
+      setMlInputMessage("Pehle koi input select karo");
+      return;
+    }
+    setMlInputBusy(true);
+    setMlInputMessage("");
+    try {
+      const res = await fetch(
+        "/api/admin/live/medialive-inputs?inputId=" + encodeURIComponent(form.medialive_input_id)
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Input test failed");
+      setMlInputMessage(
+        "Input state: " + (data.input && data.input.state ? data.input.state : "unknown")
+      );
+    } catch (e: any) {
+      setMlInputMessage("Error: " + (e.message || "test failed"));
+    } finally {
+      setMlInputBusy(false);
+    }
+  };
+
+  const copy = async (text: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(key);
+      setTimeout(() => setCopied(""), 1500);
+    } catch (e: any) {
+      setMlInputMessage("Copy failed: " + (e.message || "clipboard unavailable"));
     }
   };
 
@@ -269,6 +343,102 @@ export default function AdminLivePage() {
         <p className="mt-4 text-xs text-orange-500 bg-orange-50 p-3 rounded-lg">
           ⚠️ Jab MediaLive ON ho, camera me YouTube ka stream key nahi, balki MediaLive ka RTMP URL (Destination A) daalo. YouTube stream key MediaLive ke RTMP output group me jati hai.
         </p>
+      </div>
+
+      <div className="mt-6 bg-white rounded-2xl shadow-sm p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Camera className="w-5 h-5 text-orange-600" />
+          <h2 className="font-semibold text-orange-950">Camera / RTMP Input</h2>
+        </div>
+        <p className="text-sm text-orange-600 mb-4">
+          MediaLive ka RTMP push input chuno — camera ki RTMP URLs auto-fill ho jayengi. Save bhi yahin se karo.
+        </p>
+
+        <div className="space-y-4">
+          <Field label="MediaLive Input ID" hint="AWS MediaLive → Inputs me jo RTMP (push) input hai">
+            <select className={inputCls} value={form.medialive_input_id} onChange={selectInput}>
+              <option value="">— Input chuno —</option>
+              {mlInputs.map((i) => (
+                <option key={i.id} value={i.id}>
+                  {i.name} ({i.id})
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Camera RTMP URL (Destination A)" hint="Camera ke encoder me ye URL daalo">
+            <div className="flex gap-2">
+              <input className={inputCls} value={form.camera_rtmp_url} onChange={set("camera_rtmp_url")} placeholder="rtmp://..." />
+              <button
+                onClick={() => copy(form.camera_rtmp_url, "a")}
+                disabled={!form.camera_rtmp_url}
+                className="inline-flex items-center gap-1 bg-orange-100 text-orange-800 px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-200 transition disabled:opacity-40"
+              >
+                {copied === "a" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied === "a" ? "Copied" : "Copy"}
+              </button>
+            </div>
+          </Field>
+
+          <Field label="Camera RTMP Backup URL (Destination B)" hint="Backup destination (optional)">
+            <div className="flex gap-2">
+              <input className={inputCls} value={form.camera_rtmp_backup_url} onChange={set("camera_rtmp_backup_url")} placeholder="rtmp://..." />
+              <button
+                onClick={() => copy(form.camera_rtmp_backup_url, "b")}
+                disabled={!form.camera_rtmp_backup_url}
+                className="inline-flex items-center gap-1 bg-orange-100 text-orange-800 px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-200 transition disabled:opacity-40"
+              >
+                {copied === "b" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied === "b" ? "Copied" : "Copy"}
+              </button>
+            </div>
+          </Field>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between bg-orange-50 rounded-lg p-3">
+          <div className="text-sm text-orange-800">
+            {mlInputMessage || "Input list load karne ke liye Reload dabao, phir Test karo"}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={loadInputs}
+              disabled={mlInputBusy}
+              className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium hover:bg-orange-200 transition disabled:opacity-40"
+            >
+              {mlInputBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Radio className="w-4 h-4" />}
+              Reload
+            </button>
+            <button
+              onClick={testInput}
+              disabled={mlInputBusy || !form.medialive_input_id}
+              className="inline-flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-orange-700 transition disabled:opacity-40"
+            >
+              Test
+            </button>
+          </div>
+        </div>
+
+        <button
+          onClick={save}
+          disabled={busy}
+          className="mt-6 inline-flex items-center gap-2 bg-orange-600 text-white px-6 py-2.5 rounded-full font-medium hover:bg-orange-700 transition disabled:opacity-40"
+        >
+          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          Save Camera Settings
+        </button>
+      </div>
+
+      <div className="mt-6 bg-white rounded-2xl shadow-sm p-6">
+        <h2 className="font-semibold text-orange-950 mb-1">Camera encoder settings (recommended)</h2>
+        <p className="text-sm text-orange-600 mb-4">Camera/OBS me ye settings rakho taaki audio sync sahi rahe.</p>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-orange-800">
+          <li className="bg-orange-50 p-3 rounded-lg">🎥 Video: H.264</li>
+          <li className="bg-orange-50 p-3 rounded-lg">🎞️ Frame rate: 30 fps</li>
+          <li className="bg-orange-50 p-3 rounded-lg">🔢 GOP: 60 (2s)</li>
+          <li className="bg-orange-50 p-3 rounded-lg">🚫 B-frames: 0</li>
+          <li className="bg-orange-50 p-3 rounded-lg">📶 Bitrate: CBR</li>
+          <li className="bg-orange-50 p-3 rounded-lg">🎧 Audio: AAC-LC, 48 kHz, CBR</li>
+        </ul>
       </div>
 
       <details className="mt-6 bg-white rounded-2xl shadow-sm p-6">

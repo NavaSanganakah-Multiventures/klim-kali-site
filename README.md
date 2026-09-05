@@ -15,27 +15,31 @@ fixed frame rate, which fixes the sync problem before the stream reaches YouTube
 ## Where is what
 
 - app/live-darshan/page.tsx — public live viewer (YouTube iframe embed)
-- app/admin/live/page.tsx — admin control panel (YouTube + AWS MediaLive settings, start/end, status)
+- app/admin/live/page.tsx — admin control panel (YouTube + AWS MediaLive + camera RTMP settings, start/end, status)
 - app/api/admin/live/route.ts — get/save live config (secrets masked)
 - app/api/admin/live/start/route.ts — start live (starts MediaLive then YouTube broadcast)
 - app/api/admin/live/end/route.ts — end live (stops MediaLive and YouTube broadcast)
 - app/api/admin/live/medialive-state/route.ts — check MediaLive channel state
+- app/api/admin/live/medialive-inputs/route.ts — list RTMP push inputs + camera RTMP URLs
 - app/api/live/status/route.ts — public live status
 - lib/youtube.ts — YouTube Data API helpers (OAuth, broadcast start/end)
 - lib/medialive.ts — lightweight AWS MediaLive client (SigV4 signed fetch, Web Crypto)
 - db_migrations/0005_live_stream.sql — live_stream_config table (YouTube fields)
 - db_migrations/0006_aws_medialive.sql — AWS MediaLive columns
+- db_migrations/0007_rtmp_camera.sql — RTMP camera input columns
+- docs/live-stream-setup.md — full setup guide (AWS, Google Cloud, camera)
 
-## One-time AWS setup (manual, in AWS console)
+## One-time setup
 
-1. MediaLive -> Inputs -> Create input -> RTMP (push). Copy Destination A URL into the camera.
-2. MediaLive -> Channels -> Create channel:
-   - Input: the RTMP push input
-   - Audio output: AAC, LC-AAC profile, sample rate 48000, CBR 128000, coding mode 2.0
-   - Video output: H.264 CBR, SPECIFY frame rate 30/1, GOP 60, B-frames 0
-   - RTMP output group: YouTube stream URL + stream key
-3. IAM -> create a user with only medialive:StartChannel, medialive:StopChannel, medialive:DescribeChannel. Copy access key + secret.
-4. Admin panel -> Live Darshan -> AWS MediaLive Settings: fill region, access key, secret, channel ID. Enable MediaLive use karein and Save.
+Full step-by-step guide: docs/live-stream-setup.md
+
+Quick summary:
+1. AWS: IAM user (AWSElementalMediaLiveFullAccess) + access key/secret.
+2. AWS MediaLive: RTMP (push) input -> copy Destination A URL for the camera.
+3. AWS MediaLive: channel -> attach input, audio AAC-LC 48 kHz CBR, video H.264 CBR 30 fps, RTMP output to YouTube stream URL + key.
+4. Google Cloud: enable YouTube Data API v3, create OAuth consent screen + OAuth client, get refresh token via OAuth Playground.
+5. YouTube Studio: channel ID + stream key.
+6. Admin panel -> Live Darshan: fill YouTube, AWS MediaLive and Camera/RTMP fields. Enable "MediaLive use karein" and Save.
 
 ## Daily usage
 
