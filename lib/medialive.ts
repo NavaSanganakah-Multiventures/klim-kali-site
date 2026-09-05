@@ -129,7 +129,7 @@ export function isMedialiveConfigured(cfg: Partial<MedialiveConfig> | null): boo
 }
 
 export async function startMedialiveChannel(cfg: MedialiveConfig): Promise<void> {
-  const path = "/control/channels/" + encodeURIComponent(cfg.medialive_channel_id) + "/start";
+  const path = "/prod/channels/" + encodeURIComponent(cfg.medialive_channel_id) + "/start";
   const r = await medialiveRequest(cfg, "POST", path);
   if (r.status < 200 || r.status >= 300) {
     throw new Error(
@@ -139,7 +139,7 @@ export async function startMedialiveChannel(cfg: MedialiveConfig): Promise<void>
 }
 
 export async function stopMedialiveChannel(cfg: MedialiveConfig): Promise<void> {
-  const path = "/control/channels/" + encodeURIComponent(cfg.medialive_channel_id) + "/stop";
+  const path = "/prod/channels/" + encodeURIComponent(cfg.medialive_channel_id) + "/stop";
   const r = await medialiveRequest(cfg, "POST", path);
   if (r.status < 200 || r.status >= 300) {
     throw new Error(
@@ -149,11 +149,36 @@ export async function stopMedialiveChannel(cfg: MedialiveConfig): Promise<void> 
 }
 
 export async function describeMedialiveChannel(cfg: MedialiveConfig): Promise<any> {
-  const path = "/control/channels/" + encodeURIComponent(cfg.medialive_channel_id);
+  const path = "/prod/channels/" + encodeURIComponent(cfg.medialive_channel_id);
   const r = await medialiveRequest(cfg, "GET", path);
   if (r.status < 200 || r.status >= 300) {
     throw new Error(
       "MediaLive describe failed (" + r.status + "): " + JSON.stringify(r.data)
+    );
+  }
+  return r.data;
+}
+
+export async function listMedialiveInputs(cfg: MedialiveConfig): Promise<any> {
+  const path = "/prod/inputs";
+  const r = await medialiveRequest(cfg, "GET", path);
+  if (r.status < 200 || r.status >= 300) {
+    throw new Error(
+      "MediaLive ListInputs failed (" + r.status + "): " + JSON.stringify(r.data)
+    );
+  }
+  return r.data;
+}
+
+export async function describeMedialiveInput(
+  cfg: MedialiveConfig,
+  inputId: string,
+): Promise<any> {
+  const path = "/prod/inputs/" + encodeURIComponent(inputId);
+  const r = await medialiveRequest(cfg, "GET", path);
+  if (r.status < 200 || r.status >= 300) {
+    throw new Error(
+      "MediaLive DescribeInput failed (" + r.status + "): " + JSON.stringify(r.data)
     );
   }
   return r.data;
