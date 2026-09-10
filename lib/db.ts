@@ -5,6 +5,9 @@ export const memoryDb = {
   bookings: new Map<string, any>(),
   donations: new Map<string, any>(),
   events: new Map<string, any>(),
+  announcements: new Map<string, any>(),
+  inquiries: new Map<string, any>(),
+  galleryImages: new Map<string, any>(),
 };
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
