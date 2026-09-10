@@ -58,14 +58,15 @@ export async function POST(req: NextRequest) {
 
     if (db) {
       await db.prepare(
-        "INSERT INTO donations (id, user_id, amount, name, purpose, status) VALUES (?, ?, ?, ?, ?, ?)"
+        "INSERT INTO donations (id, user_id, amount, name, purpose, status, payment_mode) VALUES (?, ?, ?, ?, ?, ?, ?)"
       ).bind(
         donationId,
         userId || donorDetails.email || "anonymous",
         donorDetails.amount,
         donorDetails.name,
         donorDetails.purpose || "Donation",
-        "SUCCESS"
+        "SUCCESS",
+        "ONLINE"
       ).run();
     } else {
       const fallbackDb = getDb();
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
         name: donorDetails.name,
         purpose: donorDetails.purpose || "Donation",
         status: "SUCCESS",
+        payment_mode: "ONLINE",
         createdAt: new Date().toISOString(),
       });
     }
