@@ -42,8 +42,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, amount, purpose, phone, payment_mode, notes, display_on_site } = body;
 
-    if (!name || !amount || amount < 1 || !purpose) {
-      return NextResponse.json({ error: "Name, amount and purpose are required" }, { status: 400 });
+    if (!name || typeof amount !== "number" || isNaN(amount) || amount < 1 || !purpose) {
+      return NextResponse.json({ error: "Name, valid amount and purpose are required" }, { status: 400 });
     }
 
     const donationId = crypto.randomUUID();
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       const fallback = getDb();
       fallback.donations.set(donationId, {
         id: donationId,
-        user_id: admin.user.id,
+        userId: admin.user.id,
         amount,
         name,
         purpose,
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         phone: phone || null,
         payment_mode: payment_mode || "CASH",
         notes: notes || null,
-        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       });
     }
 
@@ -101,6 +101,10 @@ export async function PATCH(req: NextRequest) {
 
     const db = admin.db;
     if (db) {
+      const existing = await db.prepare("SELECT id FROM donations WHERE id = ?").bind(id).first();
+      if (!existing) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
       await db.prepare("UPDATE donations SET display_on_site = ? WHERE id = ?").bind(display_on_site, id).run();
       return NextResponse.json({ success: true });
     }
