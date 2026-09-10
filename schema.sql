@@ -59,6 +59,7 @@ CREATE TABLE donations (
 CREATE INDEX IF NOT EXISTS idx_donations_user_id ON donations(user_id);
 CREATE INDEX IF NOT EXISTS idx_donations_created_at ON donations(created_at);
 CREATE INDEX IF NOT EXISTS idx_donations_display_on_site ON donations(display_on_site);
+CREATE INDEX IF NOT EXISTS idx_donations_display_status ON donations(display_on_site, status);
 
 DROP TABLE IF EXISTS events;
 CREATE TABLE events (
@@ -74,3 +75,4 @@ CREATE TABLE events (
 
 CREATE INDEX IF NOT EXISTS idx_events_is_active ON events(is_active);
 CREATE INDEX IF NOT EXISTS idx_events_event_date ON events(event_date);
+CREATE INDEX IF NOT EXISTS idx_events_active_date ON events(is_active, event_date);
