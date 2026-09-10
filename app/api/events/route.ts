@@ -13,12 +13,14 @@ export async function GET(req: NextRequest) {
       // local fallback
     }
 
+    const nowIso = new Date().toISOString();
+
     let events = [];
     if (db) {
       const { results } = await db
         .prepare(
           `SELECT * FROM events
-             WHERE is_active = 1 AND event_date >= date('now')
+             WHERE is_active = 1 AND event_date >= datetime('now')
              ORDER BY event_date ASC LIMIT 20`
         )
         .all();
@@ -26,7 +28,7 @@ export async function GET(req: NextRequest) {
     } else {
       const fallback = getDb();
       events = Array.from(fallback.events.values())
-        .filter((e: any) => e.is_active === 1 && new Date(e.event_date) >= new Date())
+        .filter((e: any) => e.is_active === 1 && e.event_date >= nowIso)
         .sort((a: any, b: any) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime())
         .slice(0, 20);
     }
