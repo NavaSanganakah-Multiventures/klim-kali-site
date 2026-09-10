@@ -100,7 +100,7 @@ export function AdminNavbar() {
               <button
                 onClick={() => setIsOpen(false)}
                 className="p-2 rounded-lg hover:bg-orange-900 transition-colors"
-                aria-label="Close menu""
+                aria-label="Close menu"
               >
                 <X className="w-5 h-5" />
               </button>
