@@ -35,9 +35,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { title, description, event_date, location, image_url, is_active } = body;
 
-    if (!title || !description || !event_date) {
+    if (!title || !description || !event_date || isNaN(Date.parse(event_date))) {
       return NextResponse.json(
-        { error: "Title, description and event date are required" },
+        { error: "Title, description and a valid event date are required" },
         { status: 400 }
       );
     }
