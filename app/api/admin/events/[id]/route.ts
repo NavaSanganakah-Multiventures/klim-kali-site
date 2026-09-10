@@ -15,6 +15,13 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
 
+    const hasEditableFields =
+      body.title !== undefined ||
+      body.description !== undefined ||
+      body.event_date !== undefined ||
+      body.location !== undefined ||
+      body.image_url !== undefined;
+
     const db = admin.db;
     if (db) {
       if (typeof body.is_active === "number") {
@@ -23,17 +30,17 @@ export async function PATCH(
           .bind(body.is_active, id)
           .run();
       }
-      if (body.title !== undefined) {
+      if (hasEditableFields) {
         await db
           .prepare(
-            "UPDATE events SET title = ?, description = ?, event_date = ?, location = ?, image_url = ? WHERE id = ?"
+            "UPDATE events SET title = COALESCE(?, title), description = COALESCE(?, description), event_date = COALESCE(?, event_date), location = COALESCE(?, location), image_url = COALESCE(?, image_url) WHERE id = ?"
           )
           .bind(
-            body.title,
-            body.description,
-            body.event_date,
-            body.location,
-            body.image_url,
+            body.title ?? null,
+            body.description ?? null,
+            body.event_date ?? null,
+            body.location ?? null,
+            body.image_url ?? null,
             id
           )
           .run();
@@ -46,13 +53,12 @@ export async function PATCH(
     if (!event) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (typeof body.is_active === "number") event.is_active = body.is_active;
-    if (body.title !== undefined) {
-      event.title = body.title;
-      event.description = body.description;
-      event.event_date = body.event_date;
-      event.location = body.location;
-      event.image_url = body.image_url;
-    }
+    if (body.title !== undefined) event.title = body.title;
+    if (body.description !== undefined) event.description = body.description;
+    if (body.event_date !== undefined) event.event_date = body.event_date;
+    if (body.location !== undefined) event.location = body.location;
+    if (body.image_url !== undefined) event.image_url = body.image_url;
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Admin update event error:", error);
