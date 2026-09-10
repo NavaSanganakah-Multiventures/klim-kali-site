@@ -19,33 +19,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing payment details" }, { status: 400 });
     }
 
-    // Mock mode allows missing signature
     const isMock = razorpay_signature === "mock_signature";
     if (!isMock && !razorpay_signature) {
-      return NextResponse.json({ error: "Missing payment details" }, { status: 400 });
+      return NextResponse.json({ error: "Missing signature" }, { status: 400 });
     }
 
-    const secret = process.env.RAZORPAY_KEY_SECRET || "rzp_test_mock_secret";
-    const bodyText = razorpay_order_id + "|" + razorpay_payment_id;
-
-    const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      enc.encode(secret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"]
-    );
-    const signatureBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(bodyText));
-    const expectedSignature = Array.from(new Uint8Array(signatureBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-
-    let isAuthentic = true;
     if (!isMock) {
-      isAuthentic = expectedSignature === razorpay_signature;
-    }
+      const secret = process.env.RAZORPAY_KEY_SECRET || "rzp_test_mock_secret";
+      const bodyText = razorpay_order_id + "|" + razorpay_payment_id;
 
-    if (!isAuthentic) {
-      return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 400 });
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        "raw",
+        enc.encode(secret),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+      );
+      const signatureBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(bodyText));
+      const expectedSignature = Array.from(new Uint8Array(signatureBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      if (expectedSignature !== razorpay_signature) {
+        return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 400 });
+      }
     }
 
     let db;
@@ -69,7 +65,7 @@ export async function POST(req: NextRequest) {
 
     if (db) {
       await db.prepare(
-        "INSERT INTO donations (id, user_id, amount, name, purpose, status, payment_mode) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO donations (id, user_id, amount, name, purpose, status, payment_mode, campaign_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
       ).bind(
         donationId,
         userId || donorDetails.email || "anonymous",
@@ -80,13 +76,11 @@ export async function POST(req: NextRequest) {
         "ONLINE",
         selectedCampaignId
       ).run();
+
       if (selectedCampaignId) {
-        await db.prepare("UPDATE donation_campaigns SET raised_amount = raised_amount + ? WHERE id = ?").bind(donorDetails.amount, selectedCampaignId).run();
+        await db.prepare("UPDATE donation_campaigns SET raised_amount = raised_amount + ? WHERE id = ?")
+          .bind(donorDetails.amount, selectedCampaignId).run();
       }
-    } else {
-        "SUCCESS",
-        "ONLINE"
-      ).run();
     } else {
       const fallbackDb = getDb();
       fallbackDb.donations.set(donationId, {
@@ -102,6 +96,7 @@ export async function POST(req: NextRequest) {
         payment_mode: "ONLINE",
         createdAt: new Date().toISOString(),
       });
+
       if (selectedCampaignId) {
         const campaign = fallbackDb.donationCampaigns.get(selectedCampaignId);
         if (campaign) {
