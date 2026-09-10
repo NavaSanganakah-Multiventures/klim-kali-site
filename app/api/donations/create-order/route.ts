@@ -20,11 +20,12 @@ export async function POST(req: NextRequest) {
         amount: amount * 100,
         currency: "INR",
         keyId,
+        campaignId: campaignId || null,
       });
     }
 
     const orderOptions = {
-      amount: amount * 100, // amount in paisa
+      amount: amount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
       notes: {
