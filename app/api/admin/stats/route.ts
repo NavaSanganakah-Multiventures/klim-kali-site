@@ -15,12 +15,16 @@ export async function GET(req: NextRequest) {
       const bookingsCount = await db.prepare("SELECT COUNT(*) as count FROM bookings").first();
       const pendingBookings = await db.prepare("SELECT COUNT(*) as count FROM bookings WHERE status = 'PENDING'").first();
       const donations = await db.prepare("SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as total FROM donations").first();
+      const eventsCount = await db.prepare("SELECT COUNT(*) as count FROM events WHERE is_active = 1").first();
+      const featuredDonations = await db.prepare("SELECT COUNT(*) as count FROM donations WHERE display_on_site = 1 AND status = 'SUCCESS'").first();
       return NextResponse.json({
         users: Number(usersCount?.count || 0),
         bookings: Number(bookingsCount?.count || 0),
         pendingBookings: Number(pendingBookings?.count || 0),
         donations: Number(donations?.count || 0),
         totalDonations: Number(donations?.total || 0),
+        events: Number(eventsCount?.count || 0),
+        featuredDonations: Number(featuredDonations?.count || 0),
       });
     }
 
@@ -33,6 +37,8 @@ export async function GET(req: NextRequest) {
       pendingBookings: bookings.filter((b: any) => b.status === "PENDING").length,
       donations: donationsList.length,
       totalDonations: donationsList.reduce((sum: number, d: any) => sum + (Number(d.amount) || 0), 0),
+      events: Array.from(fallback.events.values()).filter((e: any) => e.is_active === 1).length,
+      featuredDonations: donationsList.filter((d: any) => d.display_on_site === 1 && d.status === "SUCCESS").length,
     });
   } catch (error) {
     console.error("Admin stats error:", error);

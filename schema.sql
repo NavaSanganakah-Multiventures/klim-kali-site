@@ -48,9 +48,31 @@ CREATE TABLE donations (
   name TEXT NOT NULL,
   purpose TEXT NOT NULL,
   status TEXT DEFAULT 'SUCCESS',
+  display_on_site INTEGER NOT NULL DEFAULT 0,
+  phone TEXT,
+  payment_mode TEXT DEFAULT 'ONLINE',
+  notes TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_donations_user_id ON donations(user_id);
 CREATE INDEX IF NOT EXISTS idx_donations_created_at ON donations(created_at);
+CREATE INDEX IF NOT EXISTS idx_donations_display_on_site ON donations(display_on_site);
+CREATE INDEX IF NOT EXISTS idx_donations_display_status ON donations(display_on_site, status);
+
+DROP TABLE IF EXISTS events;
+CREATE TABLE events (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  event_date TEXT NOT NULL,
+  location TEXT,
+  image_url TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_events_is_active ON events(is_active);
+CREATE INDEX IF NOT EXISTS idx_events_event_date ON events(event_date);
+CREATE INDEX IF NOT EXISTS idx_events_active_date ON events(is_active, event_date);

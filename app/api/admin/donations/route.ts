@@ -12,7 +12,10 @@ export async function GET(req: NextRequest) {
   try {
     if (db) {
       const { results } = await db.prepare(
-        "SELECT d.*, u.email as userEmail, u.name as userName FROM donations d LEFT JOIN users u ON d.user_id = u.id ORDER BY d.created_at DESC"
+        `SELECT d.*, u.email as userEmail, u.name as userName
+           FROM donations d
+           LEFT JOIN users u ON d.user_id = u.id
+           ORDER BY d.created_at DESC`
       ).all();
       return NextResponse.json({ donations: results || [] });
     }
@@ -27,6 +30,92 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ donations });
   } catch (error) {
     console.error("Admin donations error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const admin = await requireAdmin(req);
+  if (admin.error) return admin.error;
+
+  try {
+    const body = await req.json();
+    const { name, amount, purpose, phone, payment_mode, notes, display_on_site } = body;
+
+    if (!name || typeof amount !== "number" || isNaN(amount) || amount < 1 || !purpose) {
+      return NextResponse.json({ error: "Name, valid amount and purpose are required" }, { status: 400 });
+    }
+
+    const donationId = crypto.randomUUID();
+    const db = admin.db;
+
+    if (db) {
+      await db.prepare(
+        `INSERT INTO donations (id, user_id, amount, name, purpose, status, display_on_site, phone, payment_mode, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        donationId,
+        admin.user.id,
+        amount,
+        name,
+        purpose,
+        "SUCCESS",
+        display_on_site ? 1 : 0,
+        phone || null,
+        payment_mode || "CASH",
+        notes || null
+      ).run();
+    } else {
+      const fallback = getDb();
+      fallback.donations.set(donationId, {
+        id: donationId,
+        userId: admin.user.id,
+        amount,
+        name,
+        purpose,
+        status: "SUCCESS",
+        display_on_site: display_on_site ? 1 : 0,
+        phone: phone || null,
+        payment_mode: payment_mode || "CASH",
+        notes: notes || null,
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    return NextResponse.json({ success: true, donation: { id: donationId } });
+  } catch (error) {
+    console.error("Admin create donation error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  const admin = await requireAdmin(req);
+  if (admin.error) return admin.error;
+
+  try {
+    const { id, display_on_site } = await req.json();
+    if (!id || typeof display_on_site !== "number") {
+      return NextResponse.json({ error: "Missing id or display_on_site" }, { status: 400 });
+    }
+
+    const db = admin.db;
+    if (db) {
+      const existing = await db.prepare("SELECT id FROM donations WHERE id = ?").bind(id).first();
+      if (!existing) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+      await db.prepare("UPDATE donations SET display_on_site = ? WHERE id = ?").bind(display_on_site, id).run();
+      return NextResponse.json({ success: true });
+    }
+
+    const fallback = getDb();
+    const donation = fallback.donations.get(id);
+    if (!donation) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    donation.display_on_site = display_on_site;
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Admin update donation error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
