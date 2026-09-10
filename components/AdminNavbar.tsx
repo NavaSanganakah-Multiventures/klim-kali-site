@@ -2,13 +2,14 @@
 
 import React from "react";
 import Link from "next/link";
-import { LayoutDashboard, CalendarCheck, Heart, Users, Radio, LogOut } from "lucide-react";
+import { LayoutDashboard, CalendarCheck, Heart, Users, Radio, LogOut, CalendarDays } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
   { href: "/admin/donations", label: "Donations", icon: Heart },
+  { href: "/admin/events", label: "Events", icon: CalendarDays },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/live", label: "Live Darshan", icon: Radio },
 ];
