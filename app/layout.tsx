@@ -1,10 +1,17 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import { AuthProvider } from '@/components/AuthProvider';
 import './globals.css'; // Global styles
 
 export const metadata: Metadata = {
   title: 'क्लीं काली | Kleem Kali',
   description: 'क्लीं काली की आधिकारिक वेबसाइट। आरती, पूजा-पाठ, विशेष अनुष्ठान और आचार्य पंडित धीरेंद्र त्रिपाठी जी से परामर्श।',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
