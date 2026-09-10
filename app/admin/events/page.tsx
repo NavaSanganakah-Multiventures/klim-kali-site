@@ -59,7 +59,7 @@ export default function AdminEvents() {
   };
 
   const deleteEvent = async (id: string) => {
-    if (!confirm("क्या आप यह event delete करना चाहते हैं?")) return;
+    if (!confirm("Are you sure you want to delete this event?")) return;
     try {
       const res = await fetch(`/api/admin/events/${id}`, { method: "DELETE" });
       if (res.ok) fetchEvents();
@@ -83,11 +83,11 @@ export default function AdminEvents() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-orange-950">Events</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-orange-950">Events</h1>
         <button
           onClick={() => setShowForm((s) => !s)}
-          className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           {showForm ? "Hide Form" : "Add Event"}
@@ -95,7 +95,7 @@ export default function AdminEvents() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow border border-orange-100 mb-8">
+        <form onSubmit={handleSubmit} className="bg-white p-4 md:p-6 rounded-2xl shadow border border-orange-100 mb-6 md:mb-8">
           <h2 className="text-lg font-semibold text-orange-950 mb-4">Create Event</h2>
           {message && (
             <div className={`mb-4 p-3 rounded-lg text-sm ${message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
@@ -163,7 +163,7 @@ export default function AdminEvents() {
           <button
             disabled={saving}
             type="submit"
-            className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-6 py-2 rounded-xl text-sm font-medium"
+            className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-6 py-2 rounded-xl text-sm font-medium"
           >
             {saving ? "Saving..." : "Save Event"}
           </button>
@@ -177,33 +177,33 @@ export default function AdminEvents() {
       ) : (
         <div className="bg-white rounded-2xl shadow border border-orange-100 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="min-w-[640px] w-full text-left text-xs md:text-sm">
               <thead className="bg-orange-100 text-orange-900">
                 <tr>
-                  <th className="px-6 py-4">Title</th>
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Location</th>
-                  <th className="px-6 py-4">Active</th>
-                  <th className="px-6 py-4">Actions</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4">Title</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4">Date</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4">Location</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4">Active</th>
+                  <th className="px-3 md:px-6 py-3 md:py-4">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-orange-100">
                 {events.map((event) => (
                   <tr key={event.id} className="hover:bg-orange-50/50">
-                    <td className="px-6 py-4 font-medium text-orange-950">{event.title}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-3 md:py-4 font-medium text-orange-950">{event.title}</td>
+                    <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-orange-500" />
+                        <Calendar className="w-4 h-4 text-orange-500 shrink-0" />
                         {new Date(event.event_date).toLocaleString("hi-IN", { dateStyle: "medium", timeStyle: "short" })}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-3 md:py-4">
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-orange-500" />
-                        {event.location || "-"}
+                        <MapPin className="w-4 h-4 text-orange-500 shrink-0" />
+                        <span className="break-words max-w-[120px] md:max-w-[200px]">{event.location || "-"}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-3 md:py-4">
                       <button
                         onClick={() => toggleActive(event)}
                         className={`px-3 py-1 rounded-full text-xs font-medium ${event.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
@@ -211,7 +211,7 @@ export default function AdminEvents() {
                         {event.is_active ? "Active" : "Inactive"}
                       </button>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-3 md:py-4">
                       <button
                         onClick={() => deleteEvent(event.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
