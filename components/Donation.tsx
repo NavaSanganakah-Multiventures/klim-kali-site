@@ -173,7 +173,7 @@ export function Donation() {
             transition={{ duration: 0.6 }}
             className="flex-1"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-orange-950 mb-6">सेवा व दान</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-orange-950 mb-6">सेवा व दान</h2>
             <div className="w-24 h-1 bg-red-600 rounded-full mb-6" />
             <p className="text-orange-900/80 text-lg mb-8 leading-relaxed">
               मंदिर के रखरखाव, दैनिक पूजा-आरती, अन्नदान और अन्य धार्मिक गतिविधियों में अपना योगदान दें। आपका छोटा सा सहयोग भी बड़े पुण्यों का कारण बन सकता है।
@@ -198,7 +198,7 @@ export function Donation() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex-1 w-full max-w-md bg-white p-8 rounded-3xl shadow-xl border border-orange-100"
+            className="flex-1 w-full max-w-md bg-white p-5 md:p-8 rounded-3xl shadow-xl border border-orange-100"
           >
             {user ? (
               <div className="flex border-b border-orange-100 mb-6">
@@ -226,7 +226,7 @@ export function Donation() {
                 </button>
               </div>
             ) : (
-              <h3 className="text-2xl font-bold text-orange-950 mb-6 text-center">ऑनलाइन दान करें</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-orange-950 mb-6 text-center">ऑनलाइन दान करें</h3>
             )}
             
             {message && (
@@ -272,7 +272,7 @@ export function Donation() {
               <form onSubmit={handleDonate} className="space-y-4" suppressHydrationWarning>
                 <div>
                   <label className="block text-sm font-medium text-orange-950 mb-1.5">दान राशि (₹)</label>
-                  <div className="grid grid-cols-4 gap-2 mb-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                     {[101, 501, 1100, 2100].map(amt => (
                       <button
                         key={amt}

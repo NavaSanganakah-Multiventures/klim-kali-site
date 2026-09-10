@@ -75,7 +75,7 @@ export function BookingModal({ isOpen, onClose, selectedService = "व्यक�
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden relative shadow-2xl animate-in zoom-in-95 duration-200 my-8">
+      <div className="bg-white rounded-3xl w-full max-w-lg mx-4 overflow-hidden relative shadow-2xl animate-in zoom-in-95 duration-200 my-8">
         <button 
           onClick={handleClose}
           className="absolute top-4 right-4 p-2 text-orange-900/50 hover:text-orange-900 bg-orange-50 rounded-full transition-colors z-10"
@@ -83,9 +83,9 @@ export function BookingModal({ isOpen, onClose, selectedService = "व्यक�
           <X className="w-5 h-5" />
         </button>
         
-        <div className="p-8">
+        <div className="p-5 md:p-8">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-orange-950 mb-2">
+            <h2 className="text-xl md:text-2xl font-bold text-orange-950 mb-2">
               पूजा व परामर्श बुकिंग
             </h2>
             <p className="text-orange-900/70 text-sm">
@@ -110,7 +110,7 @@ export function BookingModal({ isOpen, onClose, selectedService = "व्यक�
               <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Sparkles className="w-10 h-10" />
               </div>
-              <h3 className="text-2xl font-bold text-orange-950 mb-4">बुकिंग सफल रही!</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-orange-950 mb-4">बुकिंग सफल रही!</h3>
               <p className="text-orange-900/70 mb-8 leading-relaxed">
                 आपकी बुकिंग का अनुरोध प्राप्त हो गया है। मंदिर समिति जल्द ही आपसे संपर्क करेगी। माता काली आप पर कृपा बनाए रखें।
               </p>

@@ -79,7 +79,7 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden relative shadow-2xl animate-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-3xl w-full max-w-md mx-4 overflow-hidden relative shadow-2xl animate-in zoom-in-95 duration-200">
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-orange-900/50 hover:text-orange-900 bg-orange-50 rounded-full transition-colors"
@@ -87,9 +87,9 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
           <X className="w-5 h-5" />
         </button>
         
-        <div className="p-8">
+        <div className="p-5 md:p-8">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-orange-950 mb-2">
+            <h2 className="text-xl md:text-2xl font-bold text-orange-950 mb-2">
               लॉगिन / पंजीकरण
             </h2>
             <p className="text-orange-900/70 text-sm">
