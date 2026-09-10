@@ -6,6 +6,7 @@ ALTER TABLE donations ADD COLUMN payment_mode TEXT DEFAULT 'ONLINE';
 ALTER TABLE donations ADD COLUMN notes TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_donations_display_on_site ON donations(display_on_site);
+CREATE INDEX IF NOT EXISTS idx_donations_display_status ON donations(display_on_site, status);
 
 CREATE TABLE IF NOT EXISTS events (
   id TEXT PRIMARY KEY,
@@ -20,3 +21,4 @@ CREATE TABLE IF NOT EXISTS events (
 
 CREATE INDEX IF NOT EXISTS idx_events_is_active ON events(is_active);
 CREATE INDEX IF NOT EXISTS idx_events_event_date ON events(event_date);
+CREATE INDEX IF NOT EXISTS idx_events_active_date ON events(is_active, event_date);
