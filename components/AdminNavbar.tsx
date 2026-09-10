@@ -84,7 +84,7 @@ export function AdminNavbar() {
           <button
             onClick={() => setIsOpen(true)}
             className="p-2 rounded-lg hover:bg-orange-900 transition-colors"
-            aria-label="Open menu""
+            aria-label="Open menu"
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -120,7 +120,7 @@ export function AdminNavbar() {
             </div>
           </div>
           <div
-            className="flex-1 bg-black/50""
+            className="flex-1 bg-black/50"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
