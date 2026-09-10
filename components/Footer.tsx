@@ -1,13 +1,43 @@
 "use client"
 import * as React from "react"
-import { MapPin, Phone, Mail } from "lucide-react"
+import { useState } from "react"
+import { MapPin, Phone, Mail, Loader2, CheckCircle } from "lucide-react"
 
 export function Footer() {
+  const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.message) {
+      setStatus({ type: "error", text: "कृपया नाम और संदेश दर्ज करें।" });
+      return;
+    }
+    setLoading(true);
+    setStatus(null);
+    try {
+      const res = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      setStatus({ type: "success", text: "आपका संदेश भेज दिया गया है। जल्द ही संपर्क करेंगे।" });
+      setForm({ name: "", phone: "", email: "", message: "" });
+    } catch (err: any) {
+      setStatus({ type: "error", text: err.message || "कुछ त्रुटि हुई।" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <footer id="contact" className="bg-orange-950 text-orange-200">
       <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-          
+
           <div>
             <div className="flex items-center gap-2 mb-6">
               <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-xl">
@@ -40,31 +70,52 @@ export function Footer() {
 
           <div>
             <h3 className="text-xl font-bold text-white mb-6">त्वरित संपर्क (Quick Inquiry)</h3>
-            <form className="space-y-3" onSubmit={(e) => e.preventDefault()} suppressHydrationWarning>
-              <input 
-                type="text" 
-                placeholder="आपका नाम" 
+            <form className="space-y-3" onSubmit={handleSubmit} suppressHydrationWarning>
+              <input
+                type="text"
+                placeholder="आपका नाम"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full px-4 py-3 rounded-lg bg-orange-900/50 border border-orange-800 focus:outline-none focus:border-red-500 text-white placeholder-orange-200/50"
                 suppressHydrationWarning
               />
-              <input 
-                type="tel" 
-                placeholder="मोबाइल नंबर" 
+              <input
+                type="tel"
+                placeholder="मोबाइल नंबर"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 className="w-full px-4 py-3 rounded-lg bg-orange-900/50 border border-orange-800 focus:outline-none focus:border-red-500 text-white placeholder-orange-200/50"
                 suppressHydrationWarning
               />
-              <textarea 
-                placeholder="संदेश या पूजा/परामर्श की जानकारी" 
+              <input
+                type="email"
+                placeholder="ईमेल (optional)"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full px-4 py-3 rounded-lg bg-orange-900/50 border border-orange-800 focus:outline-none focus:border-red-500 text-white placeholder-orange-200/50"
+                suppressHydrationWarning
+              />
+              <textarea
+                placeholder="संदेश या पूजा/परामर्श की जानकारी"
                 rows={3}
+                value={form.message}
+                onChange={(e) => setForm({ ...form, message: e.target.value })}
                 className="w-full px-4 py-3 rounded-lg bg-orange-900/50 border border-orange-800 focus:outline-none focus:border-red-500 text-white placeholder-orange-200/50 resize-none"
                 suppressHydrationWarning
-              ></textarea>
-              <button 
+              />
+              {status && (
+                <div className={`p-3 rounded-lg text-sm ${status.type === "success" ? "bg-green-900/40 text-green-200 border border-green-800" : "bg-red-900/40 text-red-200 border border-red-800"}`}>
+                  {status.text}
+                </div>
+              )}
+              <button
                 type="submit"
-                className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-colors"
+                disabled={loading}
+                className="w-full py-3 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2"
                 suppressHydrationWarning
               >
-                भेजें
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : status?.type === "success" ? <CheckCircle className="w-4 h-4" /> : null}
+                {loading ? "भेज रहे हैं..." : "भेजें"}
               </button>
             </form>
           </div>
@@ -73,13 +124,13 @@ export function Footer() {
 
         <div className="border-t border-orange-900 mt-16 pt-8 flex flex-col md:flex-row items-center justify-between text-orange-200/50 text-sm gap-4">
           <p suppressHydrationWarning>© {new Date().getFullYear()} क्लीं काली. सर्वाधिकार सुरक्षित।</p>
-          <button 
+          <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="p-3 bg-orange-900 rounded-full hover:bg-red-600 hover:text-white transition-colors"
             aria-label="Scroll to top"
             suppressHydrationWarning
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-up"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-up"><path d="m5 12 7-7 7 7"/></svg>
           </button>
         </div>
       </div>
