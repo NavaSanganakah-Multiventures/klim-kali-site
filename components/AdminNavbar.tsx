@@ -10,6 +10,9 @@ import {
   Radio,
   LogOut,
   CalendarDays,
+  Bell,
+  MessageSquare,
+  Image as ImageIcon,
   Menu,
   X,
 } from "lucide-react";
@@ -20,6 +23,9 @@ const links = [
   { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
   { href: "/admin/donations", label: "Donations", icon: Heart },
   { href: "/admin/events", label: "Events", icon: CalendarDays },
+  { href: "/admin/gallery", label: "Gallery", icon: ImageIcon },
+  { href: "/admin/announcements", label: "Announcements", icon: Bell },
+  { href: "/admin/inquiries", label: "Inquiries", icon: MessageSquare },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/live", label: "Live Darshan", icon: Radio },
 ];
