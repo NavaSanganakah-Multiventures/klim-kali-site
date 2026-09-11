@@ -49,6 +49,7 @@ export function Navbar() {
 
               {user ? (
                 <div className="flex items-center gap-4">
+                  <Link href="/dashboard" className="text-orange-600 hover:text-red-700 font-medium text-sm">डैशबोर्ड</Link>
                   <div className="flex items-center gap-2 text-orange-900 font-medium bg-orange-50 px-3 py-1.5 rounded-full">
                     <User className="w-4 h-4" />
                     <span className="text-sm max-w-[150px] truncate">{user.email}</span>
@@ -98,6 +99,7 @@ export function Navbar() {
             <div className="px-4 pt-2 pb-6 space-y-2 flex flex-col">
               {user && (
                 <div className="px-3 py-2 mb-2 flex items-center justify-between bg-orange-50 rounded-md">
+                  <Link href="/dashboard" onClick={() => setIsOpen(false)} className="text-sm text-orange-800 font-medium hover:text-orange-600">डैशबोर्ड</Link>
                   <div className="flex items-center gap-2 text-orange-900 font-medium">
                     <User className="w-4 h-4" />
                     <span className="text-sm truncate">{user.email}</span>

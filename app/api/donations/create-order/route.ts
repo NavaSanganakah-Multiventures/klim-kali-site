@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { amount } = await req.json();
+    const { amount, campaignId } = await req.json();
 
     if (!amount || amount < 1) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
@@ -20,13 +20,17 @@ export async function POST(req: NextRequest) {
         amount: amount * 100,
         currency: "INR",
         keyId,
+        campaignId: campaignId || null,
       });
     }
 
     const orderOptions = {
-      amount: amount * 100, // amount in paisa
+      amount: amount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
+      notes: {
+        campaignId: campaignId || undefined,
+      },
     };
 
     const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
@@ -53,6 +57,7 @@ export async function POST(req: NextRequest) {
       amount: order.amount,
       currency: order.currency,
       keyId,
+      campaignId: order.notes?.campaignId || campaignId || null,
     });
   } catch (error) {
     console.error("Razorpay order creation error:", error);

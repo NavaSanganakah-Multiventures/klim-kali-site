@@ -16,8 +16,22 @@ export function Donation() {
   const [donations, setDonations] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
   
   const { user } = useAuth();
+
+  const fetchCampaigns = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/donation-campaigns");
+      if (res.ok) {
+        const data = await res.json();
+        setCampaigns(data.campaigns || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch campaigns:", error);
+    }
+  }, []);
 
   const fetchDonations = React.useCallback(async () => {
     setLoadingHistory(true);
@@ -33,6 +47,10 @@ export function Donation() {
       setLoadingHistory(false);
     }
   }, []);
+
+  useEffect(() => {
+    fetchCampaigns();
+  }, [fetchCampaigns]);
 
   useEffect(() => {
     if (user) {
@@ -74,7 +92,7 @@ export function Donation() {
       const orderRes = await fetch("/api/donations/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify({ amount, campaignId: selectedCampaignId }),
       });
       const orderData = await orderRes.json();
 
@@ -93,7 +111,8 @@ export function Donation() {
                 razorpay_order_id: orderData.orderId,
                 razorpay_payment_id: "pay_mock_" + Date.now(),
                 razorpay_signature: "mock_signature",
-                donorDetails: { name, phone, amount },
+                donorDetails: { name, phone, amount, campaignId: orderData.campaignId || selectedCampaignId },
+                campaignId: orderData.campaignId || selectedCampaignId,
               }),
             });
             const verifyData = await verifyRes.json();
@@ -102,6 +121,8 @@ export function Donation() {
               setAmount("");
               setName("");
               setPhone("");
+              setSelectedCampaignId("");
+              fetchCampaigns();
             } else {
               setMessage({ type: "error", text: "भुगतान सत्यापन विफल रहा।" });
             }
@@ -128,7 +149,8 @@ export function Donation() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 ...response,
-                donorDetails: { name, phone, amount },
+                donorDetails: { name, phone, amount, campaignId: orderData.campaignId || selectedCampaignId },
+                campaignId: orderData.campaignId || selectedCampaignId,
               }),
             });
             const verifyData = await verifyRes.json();
@@ -137,6 +159,8 @@ export function Donation() {
               setAmount("");
               setName("");
               setPhone("");
+              setSelectedCampaignId("");
+              fetchCampaigns();
             } else {
               setMessage({ type: "error", text: "भुगतान सत्यापन विफल रहा।" });
             }
@@ -300,6 +324,41 @@ export function Donation() {
                     suppressHydrationWarning
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-orange-950 mb-1.5">दान का उद्देश्य (Campaign)</label>
+                  <select
+                    value={selectedCampaignId}
+                    onChange={(e) => setSelectedCampaignId(e.target.value)}
+                    className="w-full px-4 py-3 bg-orange-50/50 border border-orange-200 rounded-xl focus:outline-none focus:border-red-500 text-orange-950"
+                  >
+                    <option value="">सामान्य दान (General Donation)</option>
+                    {campaigns.map((c) => (
+                      <option key={c.id} value={c.id}>{c.title} — ₹{c.raised_amount || 0} / ₹{c.target_amount}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {campaigns.length > 0 && (
+                  <div className="space-y-4">
+                    <p className="text-sm font-medium text-orange-950">चल रहे अभियान</p>
+                    {campaigns.slice(0, 3).map((c) => {
+                      const pct = c.target_amount ? Math.min(100, ((c.raised_amount || 0) / c.target_amount) * 100) : 0;
+                      return (
+                        <div key={c.id} className="bg-orange-50/70 p-3 rounded-xl border border-orange-100">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="font-medium text-orange-950">{c.title}</span>
+                            <span className="text-orange-800">{Math.round(pct)}%</span>
+                          </div>
+                          <div className="w-full bg-orange-200 rounded-full h-2 mb-1">
+                            <div className="bg-red-600 h-2 rounded-full" style={{ width: `${pct}%` }} />
+                          </div>
+                          <p className="text-xs text-orange-700">Target: ₹{c.target_amount} | Raised: ₹{c.raised_amount || 0}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-orange-950 mb-1.5">आपका नाम</label>

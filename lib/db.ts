@@ -4,6 +4,7 @@ export const memoryDb = {
   otps: new Map<string, any>(),
   bookings: new Map<string, any>(),
   donations: new Map<string, any>(),
+  donationCampaigns: new Map<string, any>(),
   events: new Map<string, any>(),
   announcements: new Map<string, any>(),
   inquiries: new Map<string, any>(),
