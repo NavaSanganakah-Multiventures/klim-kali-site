@@ -21,3 +21,8 @@ migrations_dir = "db_migrations"
 # Send Email Binding for Production
 [[env.production.send_email]]
 name = "SEB"
+
+# R2 Bucket for image uploads
+[[env.production.r2_buckets]]
+binding = "BUCKET"
+bucket_name = "klim-kali-gallery"
