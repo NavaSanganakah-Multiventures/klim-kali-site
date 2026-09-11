@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, Upload } from "lucide-react";
 
 export default function AdminGallery() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", category: "", image_url: "", display_order: "0", is_active: true });
+  const [form, setForm] = useState({ title: "", category: "", display_order: "0", is_active: true });
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("ALL");
 
@@ -27,6 +29,16 @@ export default function AdminGallery() {
     fetchItems();
   }, []);
 
+  useEffect(() => {
+    if (!file) {
+      setPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
   const categories = Array.from(new Set(items.map((i) => i.category))).sort();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,21 +46,31 @@ export default function AdminGallery() {
     setSaving(true);
     setMessage(null);
     try {
+      if (!file) throw new Error("कृपया एक image file चुनें");
+
+      const uploadForm = new FormData();
+      uploadForm.append("file", file);
+      const uploadRes = await fetch("/api/admin/gallery/upload", { method: "POST", body: uploadForm });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok || !uploadData.imageUrl) throw new Error(uploadData.error || "Upload failed");
+
       const res = await fetch("/api/admin/gallery", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: form.title,
           category: form.category,
-          image_url: form.image_url,
+          image_url: uploadData.imageUrl,
           display_order: parseInt(form.display_order),
           is_active: form.is_active ? 1 : 0,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save");
-      setMessage({ type: "success", text: "Image added" });
-      setForm({ title: "", category: "", image_url: "", display_order: "0", is_active: true });
+
+      setMessage({ type: "success", text: "Image uploaded and saved" });
+      setForm({ title: "", category: "", display_order: "0", is_active: true });
+      setFile(null);
       fetchItems();
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
@@ -124,17 +146,6 @@ export default function AdminGallery() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-orange-900 mb-1">Image URL</label>
-              <input
-                required
-                type="url"
-                value={form.image_url}
-                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                className="w-full px-3 py-2 border border-orange-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="https://..."
-              />
-            </div>
-            <div>
               <label className="block text-sm font-medium text-orange-900 mb-1">Display Order</label>
               <input
                 type="number"
@@ -144,23 +155,45 @@ export default function AdminGallery() {
                 className="w-full px-3 py-2 border border-orange-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
+            <div className="flex items-center gap-2 md:col-span-1">
+              <input
+                id="active"
+                type="checkbox"
+                checked={form.is_active}
+                onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                className="w-5 h-5 text-orange-600 rounded border-orange-300 focus:ring-orange-500"
+              />
+              <label htmlFor="active" className="text-sm font-medium text-orange-900">Active</label>
+            </div>
           </div>
-          <div className="flex items-center gap-2 mb-4">
-            <input
-              id="active"
-              type="checkbox"
-              checked={form.is_active}
-              onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-              className="w-5 h-5 text-orange-600 rounded border-orange-300 focus:ring-orange-500"
-            />
-            <label htmlFor="active" className="text-sm font-medium text-orange-900">Active</label>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-orange-900 mb-1">Image File (JPG/PNG/WebP, max 5MB)</label>
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-orange-300 border-dashed rounded-xl cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/30">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <Upload className="w-8 h-8 text-orange-500 mb-2" />
+                <p className="text-sm text-orange-700">{file ? file.name : "Click to upload image"}</p>
+              </div>
+              <input
+                type="file"
+                accept="image/png, image/jpeg, image/webp, image/jpg"
+                className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+              />
+            </label>
+            {preview && (
+              <div className="mt-3">
+                <img src={preview} alt="Preview" className="h-32 w-auto rounded-lg border border-orange-200 object-cover" />
+              </div>
+            )}
           </div>
+
           <button
-            disabled={saving}
+            disabled={saving || !file}
             type="submit"
             className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-6 py-2 rounded-xl text-sm font-medium"
           >
-            {saving ? "Saving..." : "Save Image"}
+            {saving ? "Uploading..." : "Save Image"}
           </button>
         </form>
       )}

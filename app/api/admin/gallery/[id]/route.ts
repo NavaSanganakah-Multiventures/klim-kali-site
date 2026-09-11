@@ -1,3 +1,4 @@
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { getDb } from "@/lib/db";
@@ -56,12 +57,31 @@ export async function DELETE(
   try {
     const { id } = await params;
     const db = admin.db;
+    let imageUrl: string | null = null;
+
     if (db) {
+      const row: any = await db.prepare("SELECT image_url FROM gallery_images WHERE id = ?").bind(id).first();
+      if (row) imageUrl = row.image_url;
       await db.prepare("DELETE FROM gallery_images WHERE id = ?").bind(id).run();
-      return NextResponse.json({ success: true });
+    } else {
+      const fallback = getDb();
+      const item = fallback.galleryImages.get(id);
+      if (item) {
+        imageUrl = item.image_url;
+        fallback.galleryImages.delete(id);
+      }
     }
-    const fallback = getDb();
-    fallback.galleryImages.delete(id);
+
+    if (imageUrl && imageUrl.startsWith("/api/gallery/serve/")) {
+      try {
+        const key = imageUrl.replace("/api/gallery/serve/", "");
+        const bucket = getCloudflareContext().env.BUCKET;
+        await bucket.delete(key);
+      } catch (e) {
+        console.error("R2 delete failed", e);
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete gallery image error:", error);
