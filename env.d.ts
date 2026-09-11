@@ -4,4 +4,5 @@ interface CloudflareEnv {
   STORAGE: any;
   CONFIG: any;
   ASSETS: any;
+  BUCKET: R2Bucket;
 }
